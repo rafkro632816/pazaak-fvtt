@@ -1,0 +1,231 @@
+﻿<div class="pzk-root">
+
+  {{!-- ================== OCZEKIWANIE NA WYBÓR TALII ================== --}}
+  {{#if isWaiting}}
+  <div class="pzk-no-game">
+    <div class="pzk-logo-glyph">⏳</div>
+    <h2 class="pzk-logo-title">{{localize "PAZAAK.waitingForPicksTitle"}}</h2>
+    <ul class="pzk-pick-list">
+      {{#each waitingPlayers}}
+      <li class="pzk-pick-item {{#if picked}}pzk-pick-done{{/if}}">
+        {{name}} {{#if picked}}✓{{else}}…{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+    {{#if isGM}}
+    <button type="button" class="pzk-btn pzk-btn-red pzk-btn-big" data-action="cancelWaiting">
+      {{localize "PAZAAK.cancelWaiting"}}
+    </button>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- ================== BRAK GRY ================== --}}
+  {{#unless hasGame}}{{#unless isWaiting}}
+  {{#if victoryPending}}
+  {{!-- ================== EKRAN ZWYCIĘZCY ================== --}}
+  <div class="pzk-victory-root">
+    <div class="pzk-victory-stars pzk-victory-stars-top">⭐ ⭐ ⭐</div>
+    <div class="pzk-victory-title">{{localize "PAZAAK.victoryTitle"}}</div>
+    <div class="pzk-victory-portrait-wrap">
+      <img class="pzk-victory-portrait" src="{{victoryData.portrait}}" alt="{{victoryData.name}}">
+    </div>
+    <div class="pzk-victory-name">{{victoryData.name}}</div>
+    {{#if victoryData.pot}}
+    <div class="pzk-victory-wager">+{{victoryData.pot}} {{victoryData.currency}}</div>
+    {{/if}}
+    <div class="pzk-victory-stars pzk-victory-stars-bot">⭐ ⭐ ⭐</div>
+    <div class="pzk-victory-footer">
+      {{#if isGM}}
+      <button type="button" class="pzk-btn pzk-btn-gold pzk-btn-big" data-action="closeVictory">
+        {{localize "PAZAAK.victoryClose"}}
+      </button>
+      {{/if}}
+    </div>
+  </div>
+  {{else}}
+  {{!-- ================== BRAK GRY ================== --}}
+  <div class="pzk-no-game">
+    <div class="pzk-logo-glyph"><img src="modules/pazaak-fvtt/assets/Icons/pazaak_cards_icon.svg" alt="Pazaak" style="width:64px;height:64px;"></div>
+    <h2 class="pzk-logo-title">Pazaak</h2>
+    {{#if isGM}}
+    <p>{{localize "PAZAAK.noGame"}}</p>
+    <button type="button" class="pzk-btn pzk-btn-gold pzk-btn-big" data-action="startGame">
+      {{localize "PAZAAK.startNewMatch"}}
+    </button>
+    <button type="button" class="pzk-btn pzk-btn-neutral" data-action="openDeckBuilder" style="margin-top:4px">
+      🃏 {{localize "PAZAAK.deckBuilderOpen"}}
+    </button>
+    {{else}}
+    <p>{{localize "PAZAAK.waitingForGM"}}</p>
+    {{/if}}
+  </div>
+  {{/if}}
+  {{/unless}}{{/unless}}
+
+  {{!-- ================== AKTYWNA GRA ================== --}}
+  {{#if hasGame}}
+  <div class="pzk-board">
+
+    {{!-- �� G�RNY PASEK: gemy + info �� --}}
+    <div class="pzk-topbar">
+      <div class="pzk-gems pzk-gems-left">
+        {{#if p1}}{{#each p1.gems}}<span class="pzk-gem pzk-gem-p1 {{#if won}}pzk-gem-won{{/if}}"></span>{{/each}}{{/if}}
+      </div>
+      <div class="pzk-topbar-center">
+        <div class="pzk-topbar-meta">
+          <span class="pzk-meta-item">{{localize "PAZAAK.roundLabel"}} <b>{{state.gameRound}}</b></span>
+          <span class="pzk-meta-sep">|</span>
+          <span class="pzk-meta-item">{{localize "PAZAAK.goalLabel"}}: <b>{{state.target}}</b></span>
+        </div>
+        {{#if state.wager}}
+        <div class="pzk-wager-line">
+          <span class="pzk-wager-label">{{localize "PAZAAK.wagerLabel"}}:</span>
+          <span class="pzk-wager-amount">{{wagerPot}} {{state.wagerCurrency}}</span>
+        </div>
+        {{/if}}
+      </div>
+      <div class="pzk-gems pzk-gems-right">
+        {{#if p2}}{{#each p2.gems}}<span class="pzk-gem pzk-gem-p2 {{#if won}}pzk-gem-won{{/if}}"></span>{{/each}}{{/if}}
+      </div>
+    </div>
+
+    {{!-- �� G�WNE POLE GRY �� --}}
+    <div class="pzk-field">
+
+      {{!-- Gracz 1 --}}
+      {{#if p1}}
+      <div class="pzk-side pzk-side-left{{#if p1.isActive}} pzk-side-active{{/if}}{{#if p1.busted}} pzk-side-bust{{/if}}{{#if p1.stood}} pzk-side-stood{{/if}}">
+        <div class="pzk-side-header">
+          <span class="pzk-player-name">{{p1.name}}</span>
+          {{#if showDeckName}}<span class="pzk-deck-name">{{p1.deckName}}</span>{{/if}}
+          <span class="pzk-status-badge pzk-badge-{{p1.statusKey}}">{{p1.statusLabel}}</span>
+        </div>
+        <div class="pzk-score-display">{{p1.score}}</div>
+        <div class="pzk-card-grid">
+          {{#each p1.gridSlots}}
+          <div class="pzk-slot{{#if filled}} pzk-slot-filled{{/if}}{{#if isHand}} pzk-slot-hand{{/if}}{{#if isPending}} pzk-slot-pending{{/if}}{{#if doubled}} pzk-slot-doubled{{/if}}">
+            {{#if filled}}{{#if img}}<img class="pzk-slot-img" src="{{img}}" alt="{{value}}">{{else}}<span class="pzk-slot-val">{{value}}</span>{{/if}}{{#if doubled}}<span class="pzk-double-badge">×2</span>{{/if}}{{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+
+      <div class="pzk-divider"></div>
+
+      {{!-- Gracz 2 --}}
+      {{#if p2}}
+      <div class="pzk-side pzk-side-right{{#if p2.isActive}} pzk-side-active{{/if}}{{#if p2.busted}} pzk-side-bust{{/if}}{{#if p2.stood}} pzk-side-stood{{/if}}">
+        <div class="pzk-side-header">
+          <span class="pzk-player-name">{{p2.name}}</span>
+          {{#if showDeckName}}<span class="pzk-deck-name">{{p2.deckName}}</span>{{/if}}
+          <span class="pzk-status-badge pzk-badge-{{p2.statusKey}}">{{p2.statusLabel}}</span>
+        </div>
+        <div class="pzk-score-display">{{p2.score}}</div>
+        <div class="pzk-card-grid">
+          {{#each p2.gridSlots}}
+          <div class="pzk-slot{{#if filled}} pzk-slot-filled{{/if}}{{#if isHand}} pzk-slot-hand{{/if}}{{#if isPending}} pzk-slot-pending{{/if}}{{#if doubled}} pzk-slot-doubled{{/if}}">
+            {{#if filled}}{{#if img}}<img class="pzk-slot-img" src="{{img}}" alt="{{value}}">{{else}}<span class="pzk-slot-val">{{value}}</span>{{/if}}{{#if doubled}}<span class="pzk-double-badge">×2</span>{{/if}}{{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+
+    </div>
+
+    {{!-- �� DOLNA SEKCJA: rce + akcje �� --}}
+    <div class="pzk-bottom">
+
+      {{!-- Rka gracza 1 --}}
+      <div class="pzk-hand-panel pzk-hand-left">
+        <div class="pzk-hand-label">{{#if p1}}{{p1.name}}{{/if}} — {{localize "PAZAAK.handLabel"}}</div>
+        <div class="pzk-hand-row">
+          {{#if p1}}{{#each p1.handSlots}}
+          {{#if isButton}}{{#if isPlusMinus}}<button type="button" class="pzk-hand-slot" data-action="selectHandCard" data-is-plus-minus="true" data-card-n="{{cardN}}" data-card-index="{{cardIndex}}" data-is-tie-breaker="{{isTieBreaker}}" data-pm-state="none">{{else}}<button type="button" class="pzk-hand-slot" data-action="selectHandCard" data-opt-value="{{optValue}}" data-card-val="{{cardVal}}" data-display-label="{{displayLabel}}">{{/if}}{{else}}<div class="pzk-hand-slot">{{/if}}{{#if img}}<img class="pzk-hand-img" src="{{img}}" alt="{{value}}">{{else}}<span class="pzk-hand-val">{{{value}}}</span>{{/if}}{{#if isButton}}</button>{{else}}</div>{{/if}}
+          {{/each}}{{/if}}
+        </div>
+        {{#if activeIsLeft}}
+        <div class="pzk-controls">
+          {{#if pending}}
+            <input type="hidden" id="pazaak-hand-card" value="">
+            <div class="pzk-pending-info">
+              <span class="pzk-pending-val{{#if pending.isBust}} pzk-val-bust{{else if pending.isPerfect}} pzk-val-perfect{{/if}}">{{pending.valSigned}}</span>
+              <span class="pzk-pending-arrow">+</span>
+              <span class="pzk-hand-card-chosen" id="pzk-chosen-label">0</span>
+              <span class="pzk-pending-arrow">=</span>
+              <span id="pzk-live-total" class="pzk-pending-total{{#if pending.isBust}} pzk-val-bust{{else if pending.isPerfect}} pzk-val-perfect{{/if}}">{{pending.newTotal}} {{localize "PAZAAK.journalPts"}}</span>
+              {{#if pending.isBust}}<span class="pzk-bust-badge">{{localize "PAZAAK.badgeBust"}}</span>{{/if}}
+              {{#if pending.isPerfect}}<span class="pzk-perfect-badge">{{localize "PAZAAK.badgePerfect"}}</span>{{/if}}
+            </div>
+            {{#if pending.handDisabled}}
+              <p class="pzk-hint-warn">{{localize "PAZAAK.handLimitExhausted"}}</p>
+            {{/if}}
+            <div class="pzk-btn-row">
+              <button type="button" class="pzk-btn pzk-btn-gold" data-action="confirmTurn">{{localize "PAZAAK.btnEndTurn"}}</button>
+              <button type="button" class="pzk-btn pzk-btn-silver" data-action="standTurn">{{localize "PAZAAK.btnStand"}}</button>
+            </div>
+          {{else if isMyTurn}}
+            <div class="pzk-btn-row">
+              <button type="button" class="pzk-btn pzk-btn-gold pzk-btn-big" data-action="drawCard">{{localize "PAZAAK.btnDrawCard"}}</button>
+            </div>
+          {{else}}
+            <div class="pzk-waiting">{{localize "PAZAAK.waitingForMove"}}</div>
+          {{/if}}
+        </div>
+        {{/if}}
+      </div>
+
+      {{!-- Rka gracza 2 + kontrolki --}}
+      <div class="pzk-hand-panel pzk-hand-right">
+        <div class="pzk-hand-label">{{#if p2}}{{p2.name}}{{/if}} — {{localize "PAZAAK.handLabel"}}</div>
+        <div class="pzk-hand-row">
+          {{#if p2}}{{#each p2.handSlots}}
+          {{#if isButton}}{{#if isPlusMinus}}<button type="button" class="pzk-hand-slot" data-action="selectHandCard" data-is-plus-minus="true" data-card-n="{{cardN}}" data-card-index="{{cardIndex}}" data-is-tie-breaker="{{isTieBreaker}}" data-pm-state="none">{{else}}<button type="button" class="pzk-hand-slot" data-action="selectHandCard" data-opt-value="{{optValue}}" data-card-val="{{cardVal}}" data-display-label="{{displayLabel}}">{{/if}}{{else}}<div class="pzk-hand-slot">{{/if}}{{#if img}}<img class="pzk-hand-img" src="{{img}}" alt="{{value}}">{{else}}<span class="pzk-hand-val">{{{value}}}</span>{{/if}}{{#if isButton}}</button>{{else}}</div>{{/if}}
+          {{/each}}{{/if}}
+        </div>
+        {{#unless activeIsLeft}}
+        <div class="pzk-controls">
+          {{#if pending}}
+            <input type="hidden" id="pazaak-hand-card" value="">
+            <div class="pzk-pending-info">
+              <span class="pzk-pending-val{{#if pending.isBust}} pzk-val-bust{{else if pending.isPerfect}} pzk-val-perfect{{/if}}">{{pending.valSigned}}</span>
+              <span class="pzk-pending-arrow">+</span>
+              <span class="pzk-hand-card-chosen" id="pzk-chosen-label">0</span>
+              <span class="pzk-pending-arrow">=</span>
+              <span id="pzk-live-total" class="pzk-pending-total{{#if pending.isBust}} pzk-val-bust{{else if pending.isPerfect}} pzk-val-perfect{{/if}}">{{pending.newTotal}} {{localize "PAZAAK.journalPts"}}</span>
+              {{#if pending.isBust}}<span class="pzk-bust-badge">{{localize "PAZAAK.badgeBust"}}</span>{{/if}}
+              {{#if pending.isPerfect}}<span class="pzk-perfect-badge">{{localize "PAZAAK.badgePerfect"}}</span>{{/if}}
+            </div>
+            {{#if pending.handDisabled}}
+              <p class="pzk-hint-warn">{{localize "PAZAAK.handLimitExhausted"}}</p>
+            {{/if}}
+            <div class="pzk-btn-row">
+              <button type="button" class="pzk-btn pzk-btn-gold" data-action="confirmTurn">{{localize "PAZAAK.btnEndTurn"}}</button>
+              <button type="button" class="pzk-btn pzk-btn-silver" data-action="standTurn">{{localize "PAZAAK.btnStand"}}</button>
+            </div>
+          {{else if isMyTurn}}
+            <div class="pzk-btn-row">
+              <button type="button" class="pzk-btn pzk-btn-gold pzk-btn-big" data-action="drawCard">{{localize "PAZAAK.btnDrawCard"}}</button>
+            </div>
+          {{else}}
+            <div class="pzk-waiting">{{localize "PAZAAK.waitingForMove"}}</div>
+          {{/if}}
+        </div>
+        {{/unless}}
+      </div>
+    </div>
+
+    {{!-- �� STOPKA �� --}}
+    <div class="pzk-footer">
+      {{#if isGM}}
+      <button type="button" class="pzk-btn pzk-btn-danger" data-action="resetGame">{{localize "PAZAAK.btnForfeit"}}</button>
+      <button type="button" class="pzk-btn pzk-btn-neutral" data-action="startGame">{{localize "PAZAAK.btnNewMatch"}}</button>
+      {{/if}}
+    </div>
+
+  </div>
+  {{/if}}
+
+</div>

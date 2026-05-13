@@ -1,0 +1,51 @@
+{
+  "id": "pazaak-fvtt",
+  "title": "Pazaak — Star Wars Card Game",
+  "description": "A module that adds the Pazaak card game from the Star Wars universe to Foundry VTT.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Zohan",
+      "url": "https://github.com/rafkro632816",
+      "discord": "zohan_2290",
+      "flags": {}
+    },
+    {
+      "name": "Cukier",
+      "url": "https://github.com/mpowazka0311-debug",
+      "discord": "cukier_lukier",
+      "flags": {}
+    }
+  ],
+  "socket": true,
+  "esmodules": [
+    "scripts/pazaak.mjs"
+  ],
+  "styles": [
+    "styles/pazaak.css"
+  ],
+  "media": [
+    {
+      "type": "setup",
+      "url": "modules/pazaak-fvtt/assets/Cover/Pazaak - Star Wars Card Game.png",
+      "loop": false,
+      "flags": {}
+    }
+  ],
+  "languages": [
+    {
+      "lang": "pl",
+      "name": "Polski",
+      "path": "lang/pl.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

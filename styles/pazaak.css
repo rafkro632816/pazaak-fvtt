@@ -1,0 +1,974 @@
+﻿/* ============================================================
+   Pazaak Module — styles/pazaak.css
+   Motyw: metaliczna plansza KOTOR
+   ============================================================ */
+
+/* ─── Przycisk w pasku zakadek sidebara ─────────────────── */
+
+a.pazaak-tab-btn { cursor: pointer !important; }
+
+/* ─── Okno aplikacji — reset padding ────────────────────── */
+
+.app.pazaak-app .window-content,
+#pazaak-app .window-content {
+  padding:    0;
+  background: #1c1a14;
+  overflow:   hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROOT
+   ═══════════════════════════════════════════════════════════ */
+
+.pzk-root {
+  width:       100%;
+  height:      100%;
+  display:     flex;
+  flex-direction: column;
+  font-family: 'Gill Sans', 'Trebuchet MS', sans-serif;
+  color:       #d4c090;
+  background:  #1c1a14;
+}
+
+/* ─── BRAK GRY ───────────────────────────────────────────── */
+
+.pzk-no-game {
+  flex:            1;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             12px;
+  padding:         40px;
+  text-align:      center;
+  background:      radial-gradient(ellipse at center, #2c2820 0%, #14120e 100%);
+}
+
+.pzk-logo-glyph  { font-size: 3em; }
+.pzk-logo-title  { font-size: 1.6em; color: #c8a040; letter-spacing: 3px; margin: 0; }
+
+/* ═══════════════════════════════════════════════════════════
+   BOARD
+   ═══════════════════════════════════════════════════════════ */
+
+.pzk-board {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  background:
+    radial-gradient(ellipse at 50% 30%, #3a3420 0%, #1c1a14 70%);
+  border:         2px solid #5a4e30;
+  border-radius:  12px;
+  overflow:       hidden;
+}
+
+/* ─── GÓRNY PASEK ─────────────────────────────────────────── */
+
+.pzk-topbar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         6px 14px;
+  background:      linear-gradient(180deg, #0e0c08 0%, #1e1c14 100%);
+  border-bottom:   1px solid #4a4030;
+  min-height:      36px;
+}
+
+.pzk-topbar-center {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            2px;
+}
+
+.pzk-topbar-meta {
+  display:     flex;
+  gap:         8px;
+  align-items: center;
+  font-size:   0.8em;
+  color:       #a89060;
+}
+
+.pzk-wager-line {
+  display:     flex;
+  align-items: baseline;
+  gap:         5px;
+  margin-top:  1px;
+}
+
+.pzk-wager-label {
+  font-size:  0.75em;
+  color:      #8a7040;
+  letter-spacing: 0.5px;
+}
+
+.pzk-wager-amount {
+  font-size:   1.05em;
+  font-weight: bold;
+  color:       #e8c050;
+  text-shadow: 0 0 6px rgba(232,192,80,0.5);
+  letter-spacing: 0.5px;
+}
+
+.pzk-meta-sep { color: #5a4e30; }
+
+/* Gemy rundy */
+
+.pzk-gems {
+  display: flex;
+  gap:     6px;
+  align-items: center;
+}
+
+.pzk-gem {
+  display:       inline-block;
+  width:         18px;
+  height:        18px;
+  border-radius: 50%;
+  border:        2px solid #3a3020;
+  background:    #2a2410;
+  box-shadow:    inset 0 1px 3px rgba(0,0,0,0.6);
+  transition:    background 0.3s, box-shadow 0.3s;
+}
+
+.pzk-gem-p1.pzk-gem-won {
+  background: radial-gradient(circle at 35% 35%, #ff6060, #aa0000);
+  border-color: #cc3030;
+  box-shadow: 0 0 6px rgba(200,50,50,0.7), inset 0 1px 2px rgba(255,150,150,0.4);
+}
+
+.pzk-gem-p2.pzk-gem-won {
+  background: radial-gradient(circle at 35% 35%, #60e060, #208020);
+  border-color: #40a040;
+  box-shadow: 0 0 6px rgba(60,180,60,0.7), inset 0 1px 2px rgba(180,255,180,0.4);
+}
+
+/* ─── GÓWNE POLE GRY ────────────────────────────────────── */
+
+.pzk-field {
+  display:   flex;
+  flex:      1;
+  min-height: 0;
+}
+
+/* Strony graczy */
+
+.pzk-side {
+  flex:            1;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  padding:         10px 8px 6px;
+  gap:             6px;
+  transition:      background 0.3s;
+  background:      transparent;
+  position:        relative;
+}
+
+.pzk-side-active {
+  background: radial-gradient(ellipse at 50% 10%, rgba(180,140,40,0.12) 0%, transparent 70%);
+}
+
+.pzk-side-bust {
+  background: radial-gradient(ellipse at 50% 10%, rgba(180,40,40,0.15) 0%, transparent 70%);
+}
+
+.pzk-side-stood {
+  opacity: 0.75;
+}
+
+/* Nagówek strony */
+
+.pzk-side-header {
+  display:         flex;
+  width:           100%;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         0 4px;
+}
+
+.pzk-player-name {
+  font-size:   0.8em;
+  color:       #a89060;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pzk-deck-name {
+  font-size:      0.65em;
+  color:          #6a5a30;
+  font-style:     italic;
+  letter-spacing: 0;
+  text-transform: none;
+  flex:           1;
+  text-align:     center;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  white-space:    nowrap;
+  padding:        0 4px;
+}
+
+/* Status badges */
+
+.pzk-status-badge {
+  font-size:     0.65em;
+  padding:       2px 6px;
+  border-radius: 3px;
+  font-weight:   bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pzk-badge-active  { background: #4a7a30; color: #b0e070; border: 1px solid #6a9a40; }
+.pzk-badge-bust    { background: #7a2020; color: #ff8080; border: 1px solid #aa4040; animation: pzk-pulse 1s infinite alternate; }
+.pzk-badge-stood   { background: #3a3020; color: #a08040; border: 1px solid #5a4a20; }
+.pzk-badge-wait    { background: #1e1c14; color: #6a6040; border: 1px solid #3a3020; }
+
+@keyframes pzk-pulse {
+  from { opacity: 0.7; }
+  to   { opacity: 1.0; }
+}
+
+/* Wynik punktowy */
+
+.pzk-score-display {
+  font-size:   2.2em;
+  font-weight: bold;
+  color:       #c8a040;
+  text-shadow: 0 0 12px rgba(200,160,40,0.5), 0 2px 4px rgba(0,0,0,0.8);
+  line-height: 1;
+  margin:      2px 0;
+}
+
+/* Siatka kart na planszy */
+
+.pzk-card-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   5px;
+  width:                 100%;
+}
+
+.pzk-slot {
+  aspect-ratio:  3 / 4;
+  border-radius: 5px;
+  background:    #0e0c08;
+  border:        1px solid #2a2418;
+  box-shadow:    inset 0 2px 4px rgba(0,0,0,0.6);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  position:      relative;
+  overflow:      hidden;
+}
+
+/* Puste miejsce — subtelny wzór */
+.pzk-slot:not(.pzk-slot-filled)::after {
+  content:    '';
+  position:   absolute;
+  inset:      4px;
+  border:     1px solid #1e1c14;
+  border-radius: 3px;
+}
+
+/* Karta zagrana */
+.pzk-slot-filled {
+  background:  linear-gradient(160deg, #2c2818 0%, #1a1610 100%);
+  border-color: #4a4030;
+  box-shadow:  inset 0 1px 2px rgba(255,220,100,0.08), 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Karta z rki (modyfikator) */
+.pzk-slot-filled.pzk-slot-hand {
+  background:   linear-gradient(160deg, #1a2c18 0%, #101a10 100%);
+  border-color: #304a28;
+}
+
+/* Karta oczekujca (jeszcze niezatwierdzona) */
+.pzk-slot-filled.pzk-slot-pending {
+  background:   linear-gradient(160deg, #2c2010 0%, #1c1608 100%);
+  border-color: #c8a040;
+  box-shadow:   0 0 8px rgba(200,160,40,0.5), inset 0 1px 2px rgba(255,220,100,0.15);
+  animation:    pzk-pulse 0.8s infinite alternate;
+}
+
+.pzk-slot-val {
+  font-size:   0.85em;
+  font-weight: bold;
+  color:       #d4c090;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.pzk-slot-img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  border-radius: 4px;
+  display:    block;
+}
+
+.pzk-slot-hand .pzk-slot-val  { color: #80c070; }
+.pzk-slot-pending .pzk-slot-val { color: #f0c840; }
+
+/* Karta podwojona przez Double */
+.pzk-slot-doubled {
+  border-color: #c0a000;
+  box-shadow:   0 0 6px rgba(200,160,0,0.4), inset 0 1px 2px rgba(255,220,80,0.12);
+}
+
+/* Badge zakładu w topbarze */
+.pzk-wager-badge {
+  color:       #f0c040;
+  font-weight: bold;
+  text-shadow: 0 0 6px rgba(200,160,0,0.6);
+}
+
+/* Lista oczekiwania na wybór talii */
+.pzk-pick-list {
+  list-style:    none;
+  padding:       0;
+  margin:        12px 0;
+  width:         100%;
+  text-align:    left;
+}
+.pzk-pick-item {
+  padding:       4px 10px;
+  margin:        3px 0;
+  border-left:   3px solid #4a4030;
+  color:         #a09060;
+  font-size:     0.9em;
+}
+.pzk-pick-done {
+  border-left-color: #60a040;
+  color:             #8ed870;
+}
+
+/* Badge ×2 na karcie podwojonej */
+.pzk-double-badge {
+  position:    absolute;
+  bottom:      2px;
+  right:       3px;
+  font-size:   0.6em;
+  font-weight: bold;
+  color:       #ffe060;
+  text-shadow: 0 0 4px rgba(0,0,0,0.9);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GENERATOR TALII (DeckBuilderApp)
+   ═══════════════════════════════════════════════════════════ */
+
+.pazaak-deck-builder .window-content { padding: 0; }
+
+.pzk-builder-root {
+  display:         flex;
+  flex-direction:  column;
+  height:          100%;
+  background:      #1c1a14;
+}
+
+/* ── Nagłówek ── */
+.pzk-builder-header {
+  padding:       12px 16px 8px;
+  border-bottom: 1px solid #3a3020;
+  background:    linear-gradient(180deg, #2a2418 0%, #1c1a14 100%);
+  flex-shrink:   0;
+}
+
+.pzk-builder-mode-row {
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  margin-bottom: 8px;
+}
+.pzk-builder-mode-label {
+  color:       #c8a040;
+  font-size:   0.85em;
+  white-space: nowrap;
+  font-weight: bold;
+}
+.pzk-builder-mode-select {
+  flex:         1;
+  background:   #111008;
+  border:       1px solid #5a4a28;
+  border-radius: 4px;
+  color:        #d4c090;
+  padding:      4px 6px;
+  font-size:    0.85em;
+}
+.pzk-builder-mode-select:focus {
+  border-color: #c8a040;
+  outline:      none;
+}
+
+.pzk-builder-name-row {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  margin-bottom: 6px;
+}
+
+.pzk-builder-name-field {
+  flex:        1;
+  display:     flex;
+  align-items: center;
+  background:  #111008;
+  border:      1px solid #5a4a28;
+  border-radius: 4px;
+  overflow:    hidden;
+}
+.pzk-builder-name-field:focus-within {
+  border-color: #c8a040;
+  box-shadow:  0 0 0 2px rgba(200,160,64,0.2);
+}
+
+.pzk-builder-name-prefix {
+  padding:     5px 6px 5px 8px;
+  color:       #8a6820;
+  font-size:   0.9em;
+  white-space: nowrap;
+  user-select: none;
+  border-right: 1px solid #3a2e14;
+  background:  #1a1408;
+}
+
+.pzk-builder-name-label {
+  color:       #c8a040;
+  font-weight: bold;
+  white-space: nowrap;
+  font-size:   0.9em;
+}
+
+.pzk-builder-visible-row {
+  margin-bottom: 8px;
+}
+.pzk-builder-visible-label {
+  display:     flex;
+  align-items: center;
+  gap:         7px;
+  color:       #a08040;
+  font-size:   0.85em;
+  cursor:      pointer;
+}
+.pzk-builder-visible-label input[type="checkbox"] {
+  width:  14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #c8a040;
+}
+
+.pzk-builder-name-input {
+  flex:        1;
+  background:  transparent;
+  border:      none;
+  color:       #d4c090;
+  padding:     5px 8px;
+  font-size:   0.9em;
+  outline:     none;
+}
+.pzk-builder-name-input:focus { outline: none; }
+
+.pzk-builder-source {
+  font-size:  0.78em;
+  color:      #706040;
+}
+
+.pzk-builder-count-display {
+  color: #a89060;
+  transition: color 0.2s;
+}
+.pzk-builder-count-ok   { color: #60c840; }
+.pzk-builder-count-over { color: #e84040; }
+
+/* ── Siatka kart ── */
+.pzk-builder-scroll {
+  flex:       1;
+  overflow-y: auto;
+  padding:    10px 12px;
+}
+.pzk-builder-scroll::-webkit-scrollbar { width: 6px; }
+.pzk-builder-scroll::-webkit-scrollbar-track { background: #1a1810; }
+.pzk-builder-scroll::-webkit-scrollbar-thumb { background: #4a3820; border-radius: 3px; }
+
+.pzk-builder-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap:                   8px;
+}
+
+.pzk-builder-card {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            4px;
+  background:     #1a1810;
+  border:         1px solid #3a3020;
+  border-radius:  5px;
+  padding:        6px 4px 5px;
+  transition:     border-color 0.15s, background 0.15s;
+}
+.pzk-builder-card-active {
+  border-color: #8a6820;
+  background:   #221e10;
+}
+
+.pzk-builder-card-img {
+  width:         60px;
+  height:        84px;
+  object-fit:    contain;
+  border-radius: 3px;
+  image-rendering: pixelated;
+}
+.pzk-builder-card-noimg {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      #2a2418;
+  border:          1px solid #4a3820;
+  color:           #c8a040;
+  font-size:       0.85em;
+  font-weight:     bold;
+  text-align:      center;
+  border-radius:   3px;
+  padding:         4px;
+}
+
+.pzk-builder-card-label {
+  font-size:   0.72em;
+  color:       #a09060;
+  text-align:  center;
+  line-height: 1.1;
+  word-break:  break-word;
+  min-height:  2em;
+}
+
+.pzk-builder-card-controls {
+  display:     flex;
+  align-items: center;
+  gap:         3px;
+}
+
+.pzk-builder-btn-ctrl {
+  width:         22px;
+  height:        22px;
+  padding:       0;
+  border:        1px solid #4a3820;
+  border-radius: 3px;
+  background:    #2a2010;
+  color:         #c8a040;
+  font-size:     1em;
+  font-weight:   bold;
+  line-height:   1;
+  cursor:        pointer;
+  transition:    background 0.1s;
+}
+.pzk-builder-btn-ctrl:hover  { background: #3a2e14; }
+.pzk-builder-btn-ctrl:active { background: #1a1408; }
+
+.pzk-builder-card-count {
+  width:       24px;
+  text-align:  center;
+  font-size:   0.85em;
+  font-weight: bold;
+  color:       #706040;
+}
+.pzk-builder-count-active { color: #c8a040; }
+
+.pzk-builder-empty {
+  text-align: center;
+  color:      #5a4a28;
+  padding:    40px 20px;
+  font-style: italic;
+}
+
+/* ── Stopka ── */
+.pzk-builder-footer {
+  padding:       10px 16px;
+  border-top:    1px solid #3a3020;
+  background:    linear-gradient(0deg, #2a2418 0%, #1c1a14 100%);
+  display:       flex;
+  justify-content: flex-end;
+  flex-shrink:   0;
+}
+
+/* ─── PIONOWY ROZDZIELNIK ─────────────────────────────────── */
+
+.pzk-divider {
+  width:      3px;
+  background: linear-gradient(180deg, transparent, #4a4030 20%, #4a4030 80%, transparent);
+  margin:     8px 0;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   DOLNA SEKCJA: rce + kontrolki
+   ═══════════════════════════════════════════════════════════ */
+
+.pzk-bottom {
+  display:       flex;
+  border-top:    2px solid #3a3020;
+  background:    linear-gradient(180deg, #161410 0%, #0e0c08 100%);
+  min-height:    110px;
+}
+
+/* Panel rki */
+
+.pzk-hand-panel {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  padding:        8px 10px;
+  gap:            6px;
+}
+
+.pzk-hand-left  { border-right: 1px solid #3a3020; }
+
+.pzk-hand-label {
+  font-size:     0.7em;
+  color:         #7a6840;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Rzd kart rki */
+
+.pzk-hand-row {
+  display:   flex;
+  gap:       5px;
+  flex-wrap: wrap;
+}
+
+.pzk-hand-slot {
+  width:         56px;
+  height:        72px;
+  border-radius: 5px;
+  background:    linear-gradient(160deg, #221e12 0%, #141208 100%);
+  border:        1px solid #3a3020;
+  box-shadow:    inset 0 2px 4px rgba(0,0,0,0.5);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  position:      relative;
+}
+
+button.pzk-hand-slot {
+  cursor:  pointer;
+  padding: 0;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+button.pzk-hand-slot:hover {
+  border-color: #8a7030;
+  background:   linear-gradient(160deg, #3c3820 0%, #2a2618 100%);
+}
+
+button.pzk-hand-slot.pzk-hand-selected {
+  border-color: #f0c060;
+  box-shadow:   0 0 10px rgba(240,192,60,0.7), inset 0 0 4px rgba(255,220,80,0.2);
+}
+
+/* Wskaźnik + (zielona obrączka) */
+button.pzk-hand-slot.pzk-pm-plus {
+  border-color: #40c860;
+  box-shadow:   0 0 8px rgba(64,200,96,0.7);
+}
+
+button.pzk-hand-slot.pzk-pm-plus::after {
+  content:     "+";
+  position:    absolute;
+  bottom:      2px;
+  right:       4px;
+  font-size:   0.75em;
+  font-weight: bold;
+  color:       #40c860;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+/* Wskaźnik - (czerwona obrączka) */
+button.pzk-hand-slot.pzk-pm-minus {
+  border-color: #c84040;
+  box-shadow:   0 0 8px rgba(200,64,64,0.7);
+}
+
+button.pzk-hand-slot.pzk-pm-minus::after {
+  content:     "−";
+  position:    absolute;
+  bottom:      2px;
+  right:       4px;
+  font-size:   0.75em;
+  font-weight: bold;
+  color:       #c84040;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+.pzk-hand-val {
+  font-size:   0.8em;
+  font-weight: bold;
+  color:       #b0a070;
+}
+
+.pzk-hand-img {
+  width:         100%;
+  height:        100%;
+  object-fit:    contain;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ─── KONTROLKI AKCJI ─────────────────────────────────────── */
+
+.pzk-controls {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+  margin-top:     auto;
+}
+
+.pzk-pending-info {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  font-size:   0.85em;
+}
+
+.pzk-pending-val   { font-size: 1.3em; font-weight: bold; color: #c8a040; }
+.pzk-pending-arrow { color: #6a5a30; }
+.pzk-pending-total { font-size: 1.1em; font-weight: bold; color: #d4c090; }
+
+.pzk-val-bust    { color: #ff5050 !important; }
+.pzk-val-perfect { color: #50ff80 !important; }
+
+.pzk-bust-badge {
+  background: #7a1010; color: #ff8080;
+  padding: 1px 5px; border-radius: 3px;
+  font-size: 0.75em; font-weight: bold;
+  animation: pzk-pulse 0.6s infinite alternate;
+}
+
+.pzk-perfect-badge {
+  background: #104a20; color: #60ff90;
+  padding: 1px 5px; border-radius: 3px;
+  font-size: 0.75em; font-weight: bold;
+}
+
+.pzk-hand-select-row {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  font-size:   0.78em;
+  color:       #8a7850;
+}
+
+.pzk-select {
+  flex:       1;
+  background: #0e0c08;
+  color:      #c8a040;
+  border:     1px solid #4a4030;
+  border-radius: 3px;
+  padding:    2px 4px;
+  font-size:  0.85em;
+}
+
+.pzk-btn-row {
+  display: flex;
+  gap:     6px;
+}
+
+.pzk-waiting {
+  font-size:  0.8em;
+  color:      #5a5030;
+  font-style: italic;
+  padding:    4px 0;
+}
+
+/* ─── PRZYCISKI ───────────────────────────────────────────── */
+
+.pzk-btn {
+  padding:       5px 12px;
+  border-radius: 3px;
+  border:        none;
+  cursor:        pointer;
+  font-size:     0.82em;
+  font-weight:   bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition:    filter 0.15s, box-shadow 0.15s;
+}
+
+.pzk-btn:hover  { filter: brightness(1.2); }
+.pzk-btn:active { filter: brightness(0.9); }
+
+.pzk-btn-big { padding: 7px 18px; font-size: 0.9em; }
+
+.pzk-btn-gold {
+  background: linear-gradient(180deg, #c8a040 0%, #8a6820 100%);
+  color:      #1a1408;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,220,100,0.3);
+  border:     1px solid #a08030;
+}
+
+.pzk-btn-silver {
+  background: linear-gradient(180deg, #a0a0a0 0%, #606060 100%);
+  color:      #1a1a1a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  border:     1px solid #808080;
+}
+
+.pzk-btn-danger {
+  background: linear-gradient(180deg, #8a2020 0%, #4a1010 100%);
+  color:      #ffaaaa;
+  border:     1px solid #aa3030;
+}
+
+.pzk-btn-neutral {
+  background: linear-gradient(180deg, #3a3020 0%, #1e1c10 100%);
+  color:      #a89060;
+  border:     1px solid #5a4a28;
+}
+
+/* ─── STOPKA ──────────────────────────────────────────────── */
+
+.pzk-footer {
+  display:         flex;
+  justify-content: flex-end;
+  align-items:     center;
+  gap:             8px;
+  padding:         6px 10px;
+  background:      #0a0808;
+  border-top:      1px solid #2a2418;
+}
+
+/* ─── Dialog wyboru talii ─────────────────────────────────── */
+
+.pazaak-deck-selection { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.pazaak-deck-row       { display: flex; flex-direction: column; gap: 4px; }
+.pazaak-deck-label     { font-size: 13px; }
+.pazaak-deck-select    { width: 100%; }
+
+/* ─── Karty z ręki — przyciski wyboru ──────────────────────── */
+
+.pzk-hand-cards-select {
+  display:   flex;
+  gap:       6px;
+  flex-wrap: wrap;
+  margin:    4px 0;
+}
+
+.pzk-hand-card-btn {
+  min-width:   36px;
+  padding:     4px 10px;
+  border-radius: 4px;
+  background:  linear-gradient(180deg, #2c2818 0%, #1a1610 100%);
+  border:      1px solid #4a4030;
+  color:       #c8a040;
+  font-weight: bold;
+  cursor:      pointer;
+  font-size:   0.9em;
+  transition:  background 0.15s, border-color 0.15s;
+}
+
+.pzk-hand-card-btn:hover {
+  background:  linear-gradient(180deg, #3c3820 0%, #2a2618 100%);
+  border-color: #8a7030;
+}
+
+.pzk-hand-card-btn.pzk-hand-selected {
+  background:  linear-gradient(180deg, #c8a040 0%, #8a6820 100%);
+  color:       #1a1408;
+  border-color: #f0c060;
+}
+
+.pzk-hand-card-chosen {
+  color:       #c8a040;
+  font-weight: bold;
+  font-size:   1.1em;
+  min-width:   24px;
+  text-align:  center;
+}
+
+.pzk-hint-warn {
+  font-size: 0.75em;
+  color:     #aa6040;
+  margin:    2px 0;
+}
+
+/* ═══ EKRAN ZWYCIĘZCY ════════════════════════════════════════════════════════ */
+
+.pzk-victory-root {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             10px;
+  padding:         24px 24px 20px;
+  text-align:      center;
+  font-family:     "Palatino Linotype", serif;
+  height:          100%;
+  box-sizing:      border-box;
+  background:      radial-gradient(ellipse at center top, #1e1608 0%, #0a0800 100%);
+}
+
+.pzk-victory-stars {
+  font-size:   1.4em;
+  letter-spacing: 6px;
+  color:       #c8a040;
+  opacity:     0.85;
+  line-height: 1;
+}
+
+.pzk-victory-title {
+  font-size:   2em;
+  font-weight: bold;
+  color:       #f0d060;
+  text-shadow: 0 0 12px #c8a040, 0 0 24px #8a6020;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin:      4px 0 8px;
+}
+
+.pzk-victory-portrait-wrap {
+  width:         240px;
+  height:        240px;
+  border-radius: 8px;
+  border:        3px solid #c8a040;
+  box-shadow:    0 0 20px rgba(200,160,64,0.5), 0 0 40px rgba(200,160,64,0.2);
+  overflow:      hidden;
+  background:    #0a0800;
+}
+
+.pzk-victory-portrait {
+  width:       100%;
+  height:      100%;
+  object-fit:  cover;
+  display:     block;
+}
+
+.pzk-victory-name {
+  font-size:   1.5em;
+  font-weight: bold;
+  color:       #e8d090;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.pzk-victory-wager {
+  font-size:   1.25em;
+  font-weight: bold;
+  color:       #60e060;
+  text-shadow: 0 0 8px rgba(96,224,96,0.5);
+  background:  rgba(0,80,0,0.3);
+  border:      1px solid #40a040;
+  border-radius: 6px;
+  padding:     4px 16px;
+  letter-spacing: 1px;
+}
+
+.pzk-victory-footer {
+  margin-top: 6px;
+}

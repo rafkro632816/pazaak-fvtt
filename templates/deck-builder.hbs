@@ -1,0 +1,78 @@
+<div class="pzk-root pzk-builder-root">
+
+  {{!-- ═══ NAGŁÓWEK ═══ --}}
+  <div class="pzk-builder-header">
+
+    {{!-- Tryb: nowa / edytuj istniejącą --}}
+    <div class="pzk-builder-mode-row">
+      <label class="pzk-builder-mode-label">{{localize "PAZAAK.deckBuilderMode"}}:</label>
+      <select name="deck-edit-target" class="pzk-builder-mode-select">
+        <option value="__new__" {{#unless isEditing}}selected{{/unless}}>
+          {{localize "PAZAAK.deckBuilderModeNew"}}
+        </option>
+        {{#each editableTables}}
+        <option value="{{name}}" {{#if (eq ../editingTableName name)}}selected{{/if}}>
+          {{name}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="pzk-builder-name-row">
+      <label class="pzk-builder-name-label">{{localize "PAZAAK.deckBuilderNameLabel"}}</label>
+      <div class="pzk-builder-name-field">
+        <span class="pzk-builder-name-prefix">Pazzak - </span>
+        <input type="text" name="deck-name-suffix" class="pzk-builder-name-input"
+               placeholder="{{localize "PAZAAK.deckBuilderNamePlaceholder"}}"
+               value="{{deckNameSuffix}}">
+      </div>
+    </div>
+    <div class="pzk-builder-visible-row">
+      <label class="pzk-builder-visible-label">
+        <input type="checkbox" name="deck-player-visible" {{#if playerVisible}}checked{{/if}}>
+        {{localize "PAZAAK.deckBuilderPlayerVisible"}}
+      </label>
+    </div>
+    <div class="pzk-builder-source">
+      {{localize "PAZAAK.deckBuilderTotal"}}:
+      <b class="pzk-builder-count-display {{#if (eq totalCards deckRequired)}}pzk-builder-count-ok{{else if (gt totalCards deckRequired)}}pzk-builder-count-over{{/if}}">
+        {{totalCards}} / {{deckRequired}}
+      </b>
+    </div>
+  </div>
+
+  {{!-- ═══ LISTA KART ═══ --}}
+  <div class="pzk-builder-scroll">
+    {{#if cards.length}}
+    <div class="pzk-builder-grid">
+      {{#each cards}}
+      <div class="pzk-builder-card {{#if (gt count 0)}}pzk-builder-card-active{{/if}}">
+        {{#if img}}
+        <img class="pzk-builder-card-img" src="{{img}}" alt="{{label}}">
+        {{else}}
+        <div class="pzk-builder-card-img pzk-builder-card-noimg">{{label}}</div>
+        {{/if}}
+        <div class="pzk-builder-card-label">{{label}}</div>
+        <div class="pzk-builder-card-controls">
+          <button type="button" class="pzk-builder-btn-ctrl" data-action="decrementCard" data-label="{{label}}">−</button>
+          <span class="pzk-builder-card-count {{#if (gt count 0)}}pzk-builder-count-active{{/if}}">{{count}}</span>
+          <button type="button" class="pzk-builder-btn-ctrl" data-action="incrementCard" data-label="{{label}}">+</button>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="pzk-builder-empty">
+      {{localize "PAZAAK.deckBuilderNoSource"}}
+    </div>
+    {{/if}}
+  </div>
+
+  {{!-- ═══ STOPKA ═══ --}}
+  <div class="pzk-builder-footer">
+    <button type="button" class="pzk-btn pzk-btn-gold pzk-btn-big" data-action="createDeck">
+      {{#if isEditing}}✎ {{localize "PAZAAK.deckBuilderSave"}}{{else}}✦ {{localize "PAZAAK.deckBuilderCreate"}}{{/if}}
+    </button>
+  </div>
+
+</div>

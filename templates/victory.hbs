@@ -1,0 +1,27 @@
+<div class="pzk-victory-root">
+
+  <div class="pzk-victory-stars pzk-victory-stars-top">⭐ ⭐ ⭐</div>
+
+  <div class="pzk-victory-title">{{localize "PAZAAK.victoryTitle"}}</div>
+
+  <div class="pzk-victory-portrait-wrap">
+    <img class="pzk-victory-portrait" src="{{portrait}}" alt="{{name}}">
+  </div>
+
+  <div class="pzk-victory-name">{{name}}</div>
+
+  {{#if pot}}
+  <div class="pzk-victory-wager">
+    +{{pot}} {{currency}}
+  </div>
+  {{/if}}
+
+  <div class="pzk-victory-stars pzk-victory-stars-bot">⭐ ⭐ ⭐</div>
+
+  <div class="pzk-victory-footer">
+    <button type="button" class="pzk-btn pzk-btn-gold" data-action="close">
+      {{localize "PAZAAK.victoryClose"}}
+    </button>
+  </div>
+
+</div>
