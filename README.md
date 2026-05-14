@@ -2,8 +2,7 @@
     <img src="https://img.shields.io/badge/foundryvirtualtabletop-13--14-orange?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Compatible%20Version" alt="Foundry Core Compatible Version"/>
     <img src="https://img.shields.io/badge/foundryvirtualtabletop-13-green?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Verified%20Version" alt="Foundry Core Verified Version"/>
     <a href="https://discord.gg/RtM7r4CF3u" target="_blank">
-    <img src="https://img.shields.io/badge/Discord-info?logo=discord&link=https%3A%2F%2Fdiscord.gg%2FRtM7r4CF3u
-    " alt="foundry-compatibility-version"/></a>
+    <img src="https://img.shields.io/badge/Discord-info?logo=discord" alt="discord-link"/></a>
     <img src="assets\Cover\Pazaak - Star Wars Card Game.png" alt="Logo" style="max-width:1000%;" />
 </p>
 
