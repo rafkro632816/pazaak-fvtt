@@ -1,6 +1,8 @@
 <p align="center">
     <img src="https://img.shields.io/badge/foundryvirtualtabletop-13--14-orange?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Compatible%20Version" alt="Foundry Core Compatible Version"/>
     <img src="https://img.shields.io/badge/foundryvirtualtabletop-13-green?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Verified%20Version" alt="Foundry Core Verified Version"/>
+    <a href="https://discord.gg/RtM7r4CF3u" target="_blank">
+    <img src="https://img.shields.io/badge/Discord-info?logo=discord" alt="discord-link"/></a>
     <img src="assets\Cover\Pazaak - Star Wars Card Game.png" alt="Logo" style="max-width:1000%;" />
 </p>
 
@@ -68,8 +70,26 @@ The round is won by whoever has the highest score at or below the target. First 
 
 | Start screen | Game board |
 |:---:|:---:|
-| ![Start screen](assets\Preview\Launch.png) | ![Game board](assets\Preview\Game.png) |
+| ![Start screen](assets/Preview/Launch.png) | ![Game board](assets/Preview/Game.png) |
 
 | Deck Builder | Choose decks |
 |:---:|:---:|
-| ![Deck Builder](assets\Preview\Deck_Generator.png) | ![Choose decks](assets\Preview\Start.png) |
+| ![Deck Builder](assets/Preview/Deck_Generator.png) | ![Choose decks](assets/Preview/Start.png) |
+
+---
+
+## 🔗 Compatibility
+
+This module is system-agnostic and works with any Foundry VTT system. The following systems and modules have been tested and confirmed compatible:
+
+### Systems
+
+| System | Key | Link |
+|--------|-----|------|
+| Dungeons & Dragons 5e | `dnd5e` | [https://github.com/foundryvtt/dnd5e](https://github.com/foundryvtt/dnd5e) |
+
+### Modules
+
+| Module | Key | Link | Notes |
+|--------|-----|------|-------|
+| SW5E | `sw5e` | [https://github.com/sw5e-foundry/sw5e-module](https://github.com/sw5e-foundry/sw5e-module) | When detected, wager currency defaults to SW5E currencies automatically |
