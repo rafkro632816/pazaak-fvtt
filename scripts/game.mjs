@@ -1,6 +1,6 @@
 // ============================================================
 //  Pazaak — game.mjs
-//  Cała logika gry: tury, rundy, mecz
+//  Core match state machine: turn processing, round resolution, and match lifecycle
 // ============================================================
 
 import { MODULE_ID, getCfg, t, getActiveCurrency }   from "./config.mjs";
@@ -8,18 +8,27 @@ import { loadState, saveState, clearState, migrateState } from "./state.mjs";
 import { chat, renderMatchEnd, renderState }  from "./ui.mjs";
 import { startGameLog, logTurn, logRoundEnd, logMatchEnd } from "./journal.mjs";
 
-// ─── Drobne pomocniki ─────────────────────────────────────────────────────────
+// ─── Utility helpers ─────────────────────────────────────────────────────────
 
+/**
+ * Returns true when a player is no longer active in the current round.
+ */
 export function isInactive(p) {
   return !p || p.stood || p.busted;
 }
 
+/**
+ * Returns true when every player in the state is inactive.
+ */
 export function isFinished(state) {
   return state.playerIds.every(id => isInactive(state.scores[id]));
 }
 
+/**
+ * Determines the round winner(s) based on score, bust status, and tie-breakers.
+ */
 export function getRoundWinners(state) {
-  // Gracz z 9 kartami bez busta auto-wygrywa niezależnie od sumy
+  // Auto-win condition: 9 cards without bust takes the round.
   const nineCard = state.playerIds
     .map(id => state.scores[id])
     .find(p => p && !p.busted && (p.draws.length + p.handMods.length) >= 9);
@@ -33,7 +42,7 @@ export function getRoundWinners(state) {
     if      (p.score > best) { best = p.score; winners = [p]; }
     else if (p.score === best) winners.push(p);
   }
-  // Tie Breaker: przy remisie wygrywa gracz, który zagrał tę kartę
+  // Tie Breaker: resolve a tied top score by the player who played the tie-breaker card.
   if (winners.length > 1) {
     const tb = winners.find(p => p.usedTieBreaker);
     if (tb) return [tb];
@@ -47,7 +56,7 @@ export function getMatchWinners(state) {
     .filter(p => p && p.roundWins >= state.roundsToWin);
 }
 
-// ─── Pomocnik: dekoduj HTML entities z tekstów Foundry DB ────────────────────
+// ─── Helper: decode HTML entities from Foundry DB strings ───────────────────
 
 function _decodeHtml(str) {
   const txt = document.createElement("textarea");
@@ -55,16 +64,16 @@ function _decodeHtml(str) {
   return txt.value;
 }
 
-// ─── Dobieranie ręki ─────────────────────────────────────────────────────────
+// ─── Hand drawing ───────────────────────────────────────────────────────────
 
 export async function drawHand(table, count) {
   const hand    = [];
-  const usedIds = new Set();   // śledź tylko w pamięci — baza RollTable nienaruszona
+  const usedIds = new Set();   // track draws in memory only — do not alter the RollTable
 
   for (let i = 0; i < count; i++) {
     const available = table.results.filter(r => !usedIds.has(r.id));
     if (!available.length) {
-      console.warn(`Pazaak | Talia "${table.name}" wyczerpana po ${i} kartach.`);
+      console.warn(`Pazaak | Table "${table.name}" exhausted after ${i} cards.`);
       break;
     }
     const result = available[Math.floor(Math.random() * available.length)];
@@ -78,8 +87,8 @@ export async function drawHand(table, count) {
 }
 
 /**
- * Zużywa kartę z ręki gracza.
- * choice = "indeks|wartość_int|etykieta" (format z selecta w dialogu)
+ * Removes a selected card from the player's hand and returns its parsed metadata.
+ * choice = "index|int_value|label" (select dialog format)
  */
 export function consumeHandCard(player, choice) {
   if (!choice) return null;
@@ -91,7 +100,7 @@ export function consumeHandCard(player, choice) {
   return { value, label: labelRaw };
 }
 
-/** Resetuje flagi drawn na taliach użytych w meczu (tylko GM). */
+/** Reset drawn flags on hand tables used in the match (GM only). */
 export async function resetHandTables(state) {
   if (!game.user.isGM || !state) return;
   const seen = new Set();
@@ -104,14 +113,15 @@ export async function resetHandTables(state) {
   }
 }
 
-// ─── Start meczu ─────────────────────────────────────────────────────────────
+// ─── Match start ─────────────────────────────────────────────────────────────
 
 /**
- * Inicjuje nowy mecz na podstawie tablicy tokenów.
- * @param {Token[]} tokens  — minimum 2 tokeny ze sceny
- * @param {Record<string,string>} [deckMap]  — opcjonalna mapa actorId → nazwa tabeli
- * @param {number} [wager]  — kwota zakładu (0 = brak)
- * @returns {boolean} true jeśli start się powiódł
+ * Initializes a new match from a set of scene tokens.
+ * @param {Token[]} tokens            - at least 2 scene tokens
+ * @param {Record<string,string>} [deckMap] - optional actorId → table name mapping
+ * @param {number} [wager]           - wager amount (0 = none)
+ * @param {string|null} [currency]   - optional currency key override
+ * @returns {boolean} true if match initialization succeeded
  */
 export async function startMatch(tokens, deckMap = {}, wager = 0, currency = null) {
   const cfg = getCfg();
@@ -134,7 +144,7 @@ export async function startMatch(tokens, deckMap = {}, wager = 0, currency = nul
     wagerCurrency: currency ?? getActiveCurrency().key,
   };
 
-  // 1. Rozwiąż talie dla każdego gracza (walidacja przed ruszeniem kart)
+  // 1. Resolve each player's hand table using explicit selection, actor-specific table, or fallback
   const handTables = {};
   for (const tok of tokens) {
     const id           = tok.actor.id;
@@ -154,7 +164,7 @@ export async function startMatch(tokens, deckMap = {}, wager = 0, currency = nul
     handTables[id] = handTable;
   }
 
-  // 2. Rozdaj karty
+  // 2. Deal hands into each player's state
   for (const tok of tokens) {
     const id        = tok.actor.id;
     const handTable = handTables[id];
@@ -176,7 +186,7 @@ export async function startMatch(tokens, deckMap = {}, wager = 0, currency = nul
   await saveState(state);
   await chat(t("chatMatchStart", { players: state.playerIds.map(id => state.scores[id]?.name).join(" vs ") }));
 
-  // Sprawdź czy gracze mają wystarczające środki na zakład
+  // Validate each player's funds before collecting the wager
   if (state.wager > 0) {
     const path = `system.currency.${state.wagerCurrency}`;
     for (const id of state.playerIds) {
@@ -202,7 +212,7 @@ export async function startMatch(tokens, deckMap = {}, wager = 0, currency = nul
     }
   }
 
-  // Pobierz zakład od graczy (pomijaj NPC)
+  // Deduct wager from each player actor; skip non-character actors
   if (state.wager > 0) {
     for (const id of state.playerIds) {
       await adjustCurrency(id, -state.wager, state.wagerCurrency);
@@ -213,17 +223,17 @@ export async function startMatch(tokens, deckMap = {}, wager = 0, currency = nul
     }));
   }
 
-  // Utwórz stronę w dzienniku dla tego meczu
+  // Create a journal entry for this match and persist game state
   state.gamePageId = await startGameLog(state);
   await saveState(state);
 
   return true;
 }
 
-// ─── Rozpatrywanie tury ───────────────────────────────────────────────────────
+// ─── Turn resolution ──────────────────────────────────────────────────────────
 
 /**
- * Aplikuje wynik tury (karta główna + opcjonalna karta z ręki + decyzja PAS).
+ * Applies a turn result: base card, optional hand card, and stand/pass decision.
  */
 export async function resolveTurn(state, playerId, cardVal, handChoice, wantsStand) {
   migrateState(state);
@@ -235,7 +245,7 @@ export async function resolveTurn(state, playerId, cardVal, handChoice, wantsSta
     return;
   }
 
-  // Walidacja limitu kart z ręki
+  // Enforce the match-level hand card play limit
   if (handChoice && p.handCardsPlayed >= cfg.maxHandPlays) {
     ui.notifications.warn(t("notifHandLimitWarn", {
       name:  p.name,
@@ -245,26 +255,26 @@ export async function resolveTurn(state, playerId, cardVal, handChoice, wantsSta
     handChoice = "";
   }
 
-  // Aplikuj kartę główną
+  // Apply the base draw card to the player's board
   p.draws.push(cardVal);
 
-  // Aplikuj kartę z ręki
+  // Apply any selected hand card effect
   const handPlay = consumeHandCard(p, handChoice);
   let   mod      = handPlay?.value ?? 0;
   if (handPlay) {
     p.handMods.push(handPlay.label);
     p.handCardsPlayed++;
 
-    // Karta Double: podwaja wynik, ale zachowujemy oryginalną wartość w draws
-    // (doubled=true w drawDoubled[] pozwala UI pokazać ×2 badge na karcie)
+    // Double card: apply a second card value without mutating the original draw entry
+    // drawDoubled[] is used by the UI to render a ×2 badge on the original card
     if (handPlay.label === "Double") {
       if (!p.drawDoubled) p.drawDoubled = [];
       while (p.drawDoubled.length < p.draws.length - 1) p.drawDoubled.push(false);
       p.drawDoubled[p.draws.length - 1] = true;
-      mod = cardVal; // score = cardVal + cardVal = cardVal * 2 (bez zmiany draws)
+      mod = cardVal; // score = cardVal + cardVal = cardVal * 2 (without changing draws)
     }
 
-    // Karty Flip: odwracają znak wybranych kart na planszy
+    // Flip cards: invert selected board card values and compute delta for score
     const FLIP_RANGES = { "Flip 1&2": [1, 2], "Flip 3&4": [3, 4], "Flip 5&6": [5, 6] };
     const flipRange = FLIP_RANGES[handPlay.label];
     if (flipRange) {
@@ -276,7 +286,7 @@ export async function resolveTurn(state, playerId, cardVal, handChoice, wantsSta
       mod = flipDelta;
     }
 
-    // Karta Tie Breaker: zaznacza gracza — przy remisie wygrywa rundę
+    // Tie Breaker card: mark the player so a tie resolves in their favor
     if (handPlay.label === "Tie Breaker") p.usedTieBreaker = true;
   }
 
@@ -317,7 +327,7 @@ export async function resolveTurn(state, playerId, cardVal, handChoice, wantsSta
   await advanceTurn(state);
 }
 
-// ─── Postęp tury ─────────────────────────────────────────────────────────────
+// ─── Turn progression ───────────────────────────────────────────────────────
 
 export async function advanceTurn(state) {
   migrateState(state);
@@ -331,6 +341,7 @@ export async function advanceTurn(state) {
   let wrapped    = false;
   let foundActive = false;
 
+  // Advance turn to the next active player, wrapping turn order and preventing infinite loops.
   while (safety < state.playerIds.length) {
     const oldTurn  = state.turn;
     state.turn     = (state.turn + 1) % state.playerIds.length;
@@ -353,7 +364,7 @@ export async function advanceTurn(state) {
   await saveState(state);
 }
 
-// ─── Koniec rundy ─────────────────────────────────────────────────────────────
+// ─── Round end ──────────────────────────────────────────────────────────────
 
 export async function finishRound(state) {
   migrateState(state);
@@ -365,7 +376,7 @@ export async function finishRound(state) {
 
   const matchWinners = getMatchWinners(state);
   if (matchWinners.length > 0) {
-    // Nagrodź zwycięzcę zakładem (całą pulą)
+    // Award the winner the full wager pot
     if (state.wager > 0 && matchWinners.length === 1) {
       const pot = state.wager * state.playerIds.length;
       await adjustCurrency(matchWinners[0].name, pot, state.wagerCurrency, true);
@@ -375,7 +386,7 @@ export async function finishRound(state) {
         currency: state.wagerCurrency,
       }));
     } else if (state.wager > 0 && matchWinners.length > 1) {
-      // Remis meczu — zwróć zakład każdemu graczowi
+      // Match tie: refund each player's wager equally
       for (const id of state.playerIds) {
         await adjustCurrency(id, state.wager, state.wagerCurrency);
       }
@@ -387,7 +398,7 @@ export async function finishRound(state) {
     await logMatchEnd(state, matchWinners);
     await chat(renderMatchEnd(state, matchWinners));
 
-    // Ekran zwycięzcy (tylko dla jednego zwycięzcy)
+    // Victory screen (for a single winner only)
     if (matchWinners.length === 1) {
       const winnerActorId = state.playerIds.find(id => state.scores[id] === matchWinners[0]) ?? null;
       const pot           = state.wager > 0 ? state.wager * state.playerIds.length : 0;
@@ -397,9 +408,9 @@ export async function finishRound(state) {
         pot,
         currency: state.wagerCurrency,
       };
-      // Wyślij do wszystkich graczy
+      // Broadcast victory payload to all connected clients
       game.socket.emit(`module.${MODULE_ID}`, { type: "showVictory", ...victoryData });
-      // Pokaż lokalnie (przez Hook — nie importujemy victory.mjs bezpośrednio)
+      // Trigger local victory UI via Hook — avoid direct import of victory.mjs
       Hooks.call("pazaakVictory", victoryData);
     }
 
@@ -411,7 +422,7 @@ export async function finishRound(state) {
   await startNextGameRound(state);
 }
 
-// ─── Nowa runda meczu ─────────────────────────────────────────────────────────
+// ─── Next match round ───────────────────────────────────────────────────────
 
 export async function startNextGameRound(state) {
   migrateState(state);
@@ -420,7 +431,7 @@ export async function startNextGameRound(state) {
   state.gameRound++;
   state.turnCycle = 1;
 
-  // Przegrany poprzedniej rundy zaczyna następną (jak w KOTOR)
+  // The previous round loser starts the next round (like KOTOR)
   const winners = getRoundWinners(state);
   if (winners.length === 1) {
     const loserIdx = state.playerIds.findIndex(id => state.scores[id] !== winners[0]);
@@ -451,7 +462,7 @@ export async function startNextGameRound(state) {
   await chat(t("chatRoundStart", { n: state.gameRound }));
 }
 
-// ─── Normalizacja kolejki ──────────────────────────────────────────────────────
+// ─── Turn normalization ──────────────────────────────────────────────────────
 
 export async function normalizeTurn(state) {
   migrateState(state);
@@ -461,6 +472,7 @@ export async function normalizeTurn(state) {
   let safety = 0;
   let wrapped = false;
 
+  // Skip inactive players until a valid active turn is found.
   while (
     safety < state.playerIds.length &&
     isInactive(state.scores[state.playerIds[state.turn]])
@@ -474,24 +486,20 @@ export async function normalizeTurn(state) {
   if (wrapped) state.turnCycle++;
 }
 
-// ─── Waluta: dedukcja / nagroda ───────────────────────────────────────────────
+// ─── Currency: deduction / reward ────────────────────────────────────────────
 
 /**
- * Modyfikuje walutę aktora.
- * @param {string} actorIdOrName  — id aktora lub nazwa (dla zwycięzcy po wyczyszczeniu stanu)
- * @param {number} delta          — kwota (ujemna = odejmij, dodatnia = dodaj)
- * @param {string} currencyKey    — klucz pola waluty (np. "gp", "cr")
- * @param {boolean} byName        — szukaj po nazwie zamiast id
- */
-/**
- * Zmienia walutę aktora (tylko type==="character").
- * Jeśli wywołujący nie jest GM, deleguje przez socket.
+ * Adjusts a character actor's currency balance.
+ * @param {string} actorIdOrName  - actor id or name (name is used when actor id is unavailable)
+ * @param {number} delta          - amount to change (negative = subtract, positive = add)
+ * @param {string} currencyKey    - currency field key (e.g. "gp", "cr")
+ * @param {boolean} byName        - resolve actor by name instead of id
  */
 export async function adjustCurrency(actorIdOrName, delta, currencyKey, byName = false) {
   if (!delta) return;
 
   if (!game.user.isGM) {
-    // Deleguj do GM — on ma uprawnienia do aktualizacji każdego aktora
+    // Delegate to GM — they have permission to update any actor
     game.socket.emit(`module.${MODULE_ID}`, {
       type: "adjustCurrency",
       actorIdOrName, delta, currencyKey, byName,
@@ -504,7 +512,7 @@ export async function adjustCurrency(actorIdOrName, delta, currencyKey, byName =
     : game.actors.get(actorIdOrName);
   if (!actor) return;
 
-  // Tylko karty postaci gracza (PC); NPC, pojazdy itp. — pomijaj
+  // Only player character actors; skip NPCs, vehicles, and other types
   if (actor.type !== "character") return;
 
   const path    = `system.currency.${currencyKey}`;

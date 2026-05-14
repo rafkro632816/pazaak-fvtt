@@ -1,6 +1,6 @@
 // ============================================================
 //  Pazaak — pazaak.mjs
-//  Entry point: hooki, scene controls, API publiczne
+//  Entry point for module lifecycle hooks, scene controls, and public API bindings
 // ============================================================
 
 import { MODULE_ID, registerSettings, getCfg, t,
@@ -14,10 +14,10 @@ import { PazaakApp, onDeckPickResponse, showPlayerDeckPickDialog } from "./app.m
 import { adjustCurrency }                        from "./game.mjs";
 import { DeckBuilderApp }                        from "./deck-builder.mjs";
 
-// Udostępnij referencję do PazaakApp dla onChange w registerSettings
+// Expose PazaakApp to module settings callbacks so the UI can re-render on onChange
 globalThis._pazaakAppRef = { PazaakApp };
 
-// ── i18nInit — wczytaj OBA pliki językowe zanim cokolwiek się wyrenderuje ─────
+// ── i18nInit — preload module translation assets before UI initialization ─────
 
 Hooks.once("i18nInit", async () => {
   const langs = ["en", "pl"];
@@ -34,7 +34,7 @@ Hooks.once("i18nInit", async () => {
     }
   }));
 
-  // Zastosuj język wybrany w ustawieniach modułu (niezależnie od języka Foundry)
+  // Apply the module-selected language independently of Foundry's UI language
   const moduleLang = (() => {
     try { return game.settings.get(MODULE_ID, "language"); } catch { return "pl"; }
   })();
@@ -42,7 +42,7 @@ Hooks.once("i18nInit", async () => {
   console.log(`${MODULE_ID} | Aktywny język modułu: ${moduleLang}`);
 });
 
-// ── init ──────────────────────────────────────────────────────────────────────
+// ── init — configure module settings, state persistence, and template helpers ─────
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
@@ -58,7 +58,7 @@ Hooks.once("init", () => {
   ]);
 });
 
-// Ekran zwycięzcy — wywołany przez Hooks.call w game.mjs
+// Victory screen event from game.mjs: open the local victory display when received
 Hooks.on("pazaakVictory", (data) => {
   PazaakApp._victoryData = data;
   PazaakApp._victoryOpen = true;
@@ -70,6 +70,7 @@ Hooks.on("pazaakVictory", (data) => {
 Hooks.once("ready", async () => {
   console.log(`${MODULE_ID} | ready`);
 
+  // Public API available under game.pazaak for UI and external scripts
   game.pazaak = {
     open:       () => PazaakApp.openSingleton(),
     startGame:  () => PazaakApp.openSingleton(),
@@ -96,9 +97,9 @@ Hooks.once("ready", async () => {
     setup: setupPazaakWorld,
   };
 
-  // Socket relay
+  // Socket relay: handle module messages and delegate GM-only persistence operations
   game.socket.on(`module.${MODULE_ID}`, async (msg) => {
-    // GM-only: zapis stanu i journalu
+    // GM-only operations: persist state and journal updates on the server side
     if (game.user.isGM) {
       if (msg.type === "saveState")     await game.settings.set(MODULE_ID, "pazaakState", msg.state);
       if (msg.type === "clearState")    await game.settings.set(MODULE_ID, "pazaakState", null);
@@ -108,7 +109,7 @@ Hooks.once("ready", async () => {
       if (msg.type === "deckPickResponse")
         onDeckPickResponse(msg.actorId, msg.deckName);
     }
-    // Wszyscy klienci: synchronizacja pending (dobrana karta przed zatwierdzeniem)
+    // Broadcast pending draw state to all clients so the UI stays in sync
     if (msg.type === "setPending") {
       const app = PazaakApp._instance;
       if (app) { app._pending = msg.pending; app.render({ force: true }); }
@@ -117,24 +118,24 @@ Hooks.once("ready", async () => {
       const app = PazaakApp._instance;
       if (app) { app._pending = null; app.render({ force: true }); }
     }
-    // Żądanie wyboru talii — wysłane przez GM do graczy
+    // Deck pick request: GM asks players to choose from available deck tables
     if (msg.type === "requestDeckPick") {
       const { actorIds, actorNames, tables, defaults } = msg;
       for (const actorId of actorIds) {
         const actor = game.actors.get(actorId);
         if (!actor) continue;
-        // Tylko klient który posiada tego aktora (i nie jest GM — GM obsługuje lokalnie)
+        // Only the actor owner client should open the deck pick dialog, not the GM
         if (!game.user.isGM && actor.testUserPermission(game.user, "OWNER")) {
           showPlayerDeckPickDialog(actorId, actorNames[actorId], tables, defaults[actorId]);
         }
       }
     }
-    // Anulowanie trybu wyboru przez GM
+    // Cancel deck-pick mode: clear player waiting state when GM aborts selection
     if (msg.type === "cancelDeckPick") {
       const app = PazaakApp._instance;
       if (app?._waitingForPicks) { app._waitingForPicks = null; app.render({ force: true }); }
     }
-    // Ekran zwycięzcy (wszyscy gracze, GM już obsłużony przez Hook w game.mjs)
+    // Show victory dialog for non-GM clients; GM is handled via the game.mjs hook
     if (msg.type === "showVictory" && !game.user.isGM) {
       PazaakApp._victoryData = { name: msg.name, actorId: msg.actorId, pot: msg.pot, currency: msg.currency };
       PazaakApp._victoryOpen = true;
@@ -146,7 +147,7 @@ Hooks.once("ready", async () => {
   console.log(`${MODULE_ID} | game.pazaak API gotowe`);
 });
 
-// ── Scene Controls — przycisk na lewym pasku ──────────────────────────────────
+// ── Scene Controls — add the Pazaak toolbar button to the left sidebar ───────
 
 Hooks.on("getSceneControlButtons", (controls) => {
   if (!Array.isArray(controls)) return;
@@ -163,30 +164,34 @@ Hooks.on("getSceneControlButtons", (controls) => {
   });
 });
 
-// ── Zakładka w prawym pasku bocznym ─────────────────────────────────────────────
+// ── Sidebar tab button workaround ───────────────────────────────────────────
 //
-//  MutationObserver obserwuje #sidebar i wstrzykuje przycisk za każdym razem
-//  gdy Foundry przebuduje nav. Capture-phase listener łapie klik zanim Foundry
-//  wykryje brakujący panel i przerwie akcję.
+//  MutationObserver watches #sidebar and reinjects the button whenever
+//  Foundry rebuilds the nav. The capture-phase listener intercepts clicks before
+//  Foundry tries to resolve a missing tab panel.
 
+/**
+ * Ensures the Pazaak sidebar button is present in the Foundry tab bar.
+ * This is a DOM-level workaround because the module does not use a native sidebar tab panel.
+ */
 function _injectSidebarBtn() {
-  // Foundry v14: przyciski są w <menu class="flexcol"> wewnątrz <nav id="sidebar-tabs">
+  // Foundry v14: buttons live in <menu class="flexcol"> inside <nav id="sidebar-tabs">
   const menu =
     document.querySelector("#sidebar-tabs > menu") ||
     document.querySelector("#sidebar-tabs");
   if (!menu) return;
   if (menu.querySelector(".pazaak-tab-btn")) return;
 
-  // Wstawiamy <li> przed ostatnim przyciskiem (collapse), żeby być w grupie
+  // Insert <li> before the last button (collapse) so it remains grouped with sidebar controls
   const li  = document.createElement("li");
   const btn = document.createElement("button");
   btn.type      = "button";
-  // ui-control plain icon to klasy natywnych zakładek — daje identyczny wygląd
+  // ui-control plain icon matches native tabs for a consistent appearance
   btn.className = "ui-control plain pazaak-tab-btn";
   btn.innerHTML = '<img src="modules/pazaak-fvtt/assets/Icons/pazaak_cards_icon.svg" alt="Pazaak" style="width:1.2em;height:1.2em;">';
   btn.setAttribute("aria-label", "Pazaak");
   btn.setAttribute("data-tooltip", "Pazaak");
-  // NIE ustawiamy data-action="tab" ani data-tab — żeby Foundry nie szukał panelu
+  // Do NOT set data-action="tab" or data-tab so Foundry does not look for a tab panel
   li.appendChild(btn);
 
   const collapseLi = menu.querySelector("li:last-child");
@@ -194,7 +199,9 @@ function _injectSidebarBtn() {
   else            menu.appendChild(li);
 }
 
-// Capture-phase: odpala się PRZED handlerami Foundry
+/**
+ * Capture-phase listener prevents Foundry from trying to handle the pseudo-tab click.
+ */
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".pazaak-tab-btn")) return;
   e.preventDefault();
@@ -205,13 +212,17 @@ document.addEventListener("click", (e) => {
 Hooks.once("ready", () => {
   _injectSidebarBtn();
 
-  // Obserwuj cały sidebar — re-wstrzyknij gdy Foundry przebuduje nav
+  // Observe the full sidebar and reinsert the button when Foundry rebuilds the nav
   const sidebar = document.getElementById("sidebar") ?? document.querySelector("aside#sidebar");
   if (!sidebar) return;
   const observer = new MutationObserver(_injectSidebarBtn);
   observer.observe(sidebar, { childList: true, subtree: true });
 });
 
+/**
+ * Ensure required module world assets exist and perform idempotent folder migration.
+ * Called only on the GM client during startup.
+ */
 async function _autoSetup() {
   const cfg = getCfg();
   const needsSetup = !game.tables.getName(cfg.tableName)
@@ -221,11 +232,14 @@ async function _autoSetup() {
     console.log(`${MODULE_ID} | Pierwsze uruchomienie — auto-setup…`);
     await setupPazaakWorld();
   } else {
-    // Migracja folderów — przenieś istniejące tabele do właściwych folderów (idempotentna)
+    // Folder migration — move existing tables into the correct folders (idempotent)
     await setupPazaakWorld();
   }
 }
 
+/**
+ * Append HTML to the current match journal page from the GM client.
+ */
 async function _handleJournalAppend({ pageId, html }) {
   const journal = game.journal?.getName(JOURNAL_NAME);
   if (!journal) return;
