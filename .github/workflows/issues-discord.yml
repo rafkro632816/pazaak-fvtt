@@ -1,0 +1,38 @@
+on:
+  issues:
+    types: [opened, closed, reopened]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send issue notification to Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          AUTHOR="${{ github.event.issue.user.login }}"
+          URL="${{ github.event.issue.html_url }}"
+          NUMBER="${{ github.event.issue.number }}"
+          ACTION="${{ github.event.action }}"
+
+          case "$ACTION" in
+            opened)   LABEL="Nowe zgłoszenie" ; COLOR=1441536 ;;
+            closed)   LABEL="Zgłoszenie zamknięte" ; COLOR=8421504 ;;
+            reopened) LABEL="Zgłoszenie ponownie otwarte" ; COLOR=16744272 ;;
+          esac
+
+          curl -s -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"#$NUMBER — $TITLE\",
+                \"url\": \"$URL\",
+                \"color\": $COLOR,
+                \"fields\": [
+                  { \"name\": \"Autor\", \"value\": \"$AUTHOR\", \"inline\": true },
+                  { \"name\": \"Status\", \"value\": \"$LABEL\", \"inline\": true }
+                ],
+                \"footer\": { \"text\": \"Pazaak — issue tracker\" }
+              }]
+            }"
