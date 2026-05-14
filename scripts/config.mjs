@@ -1,23 +1,28 @@
 // ============================================================
 //  Pazaak — config.mjs
-//  Stałe konfiguracyjne i rejestracja ustawień modułu
+//  Configuration constants and module settings registration
 // ============================================================
 
 export const MODULE_ID = "pazaak-fvtt";
 
-// ── Bundled translations — niezależne od języka core Foundry ─────────────────
-
+/** Bundled translations independent of core Foundry language. */
 /** { pl: { "PAZAAK.x": "...", ... }, en: { ... } } */
 const _tr = {};
 
-/** Wywołuj z pazaak.mjs po pobraniu pliku językowego. */
+/**
+ * Sets the translations for a specific language.
+ * Call from pazaak.mjs after loading the language file to make translations available.
+ * @param {string} lang - Language code (e.g., "en", "pl").
+ * @param {object} data - Translation object.
+ */
 export function setTranslations(lang, data) {
   _tr[lang] = data;
 }
 
 /**
- * Merguje tłumaczenia wybranego języka do game.i18n.translations,
- * dzięki czemu {{localize}} w HBS także działa poprawnie.
+ * Applies module translations to Foundry's i18n system.
+ * Merges selected language translations into game.i18n.translations for HBS {{localize}} support.
+ * @param {string} lang - Language code to apply.
  */
 export function applyModuleLang(lang) {
   const data = _tr[lang] ?? _tr["en"];
@@ -28,9 +33,12 @@ export function applyModuleLang(lang) {
 }
 
 /**
- * Skrót do tłumaczenia ze słownika modułu.
- * Język wybierany jest z ustawienia modułu (nie z game.i18n.lang).
- * Obsługuje proste podstawienia: t("key", { name: "X" })
+ * Translates a key using the module's dictionary.
+ * Language selected from module settings (not core game.i18n.lang).
+ * Supports simple substitutions like t("key", { name: "X" }).
+ * @param {string} key - Translation key (e.g., "settingLanguage").
+ * @param {object} [data={}] - Substitution data.
+ * @returns {string} Translated string.
  */
 export function t(key, data = {}) {
   const lang = (() => { try { return game.settings.get(MODULE_ID, "language"); } catch { return DEFAULTS.language; } })();
@@ -40,7 +48,7 @@ export function t(key, data = {}) {
   return str;
 }
 
-/** Domyślne wartości (używane przed załadowaniem game.settings) */
+/** Default configuration values, used before game.settings loads. */
 export const DEFAULTS = {
   language:              "en",
   tableName:             "Pazaak - Cukier base",
@@ -61,17 +69,18 @@ export const DEFAULTS = {
 };
 
 /**
- * Zwraca listę dostępnych walut na podstawie aktywnego systemu / modułów.
- * Format: [{ key, label, path }]
+ * Retrieves available currencies based on active system/modules.
+ * Supports SW5E, dnd5e, and generic fallback.
+ * @returns {Array<{key: string, label: string, path: string}>} Currency list.
  */
 export function getAvailableCurrencies() {
   const sys = (game.system?.id ?? "").toLowerCase();
 
-  // SW5E jest modułem na bazie dnd5e — sprawdzamy aktywność modułu
+  // SW5E is a dnd5e-based module; check if active
   const isSW5E = game.modules?.get("sw5e-module")?.active === true;
 
   if (isSW5E) {
-    // Sprawdź czy moduł sw-currency jest aktywny i udostępnia konfigurację
+    // Check if sw-currency module is active and provides config
     const swMod = game.modules?.get("sw-currency") ?? game.modules?.get("sw5e-currency");
     if (swMod?.active) {
       try {
@@ -86,9 +95,9 @@ export function getAvailableCurrencies() {
             }));
           }
         }
-      } catch { /* brak ustawień modułu — ignoruj */ }
+      } catch { /* ignore if settings unavailable */ }
     }
-    // Domyślne waluty SW5E
+    // Default SW5E currencies
     return [
       { key: "gc",   label: "Galactic Credit (gc)", path: "system.currency.gc" },
       { key: "Wup",  label: "Wupiupi (Wup)",        path: "system.currency.Wup" },
@@ -107,13 +116,14 @@ export function getAvailableCurrencies() {
     ];
   }
 
-  // Generyczny fallback
+  // Generic fallback for unsupported currency systems
   return [{ key: "gp", label: "Gold (gp)", path: "system.currency.gp" }];
 }
 
 /**
- * Zwraca aktywną walutę (obiekt { key, label, path }).
- * Jeśli ustawienie to "auto", wybiera pierwszą z listy.
+ * Gets the active currency object.
+ * If setting is "auto", selects the first available currency.
+ * @returns {{key: string, label: string, path: string}} Active currency.
  */
 export function getActiveCurrency() {
   const list = getAvailableCurrencies();
@@ -123,15 +133,17 @@ export function getActiveCurrency() {
       const found = list.find(c => c.key === saved);
       if (found) return found;
     }
-  } catch { /* przed init */ }
+  } catch { /* fallback before init; settings may not be available */ }
   return list[0];
 }
 
 /**
- * Zwraca aktualną konfigurację (ustawienia modułu + stałe).
- * Bezpieczne do wywołania po fazie "init".
+ * Retrieves current module configuration (settings + constants).
+ * Safe to call after the 'init' hook when game.settings is available.
+ * @returns {object} Configuration object.
  */
 export function getCfg() {
+  // Helper to safely get settings; falls back to DEFAULTS if game.settings unavailable (e.g., before 'init' hook).
   const get = (key) => {
     try { return game.settings.get(MODULE_ID, key); }
     catch { return DEFAULTS[key]; }
@@ -154,8 +166,13 @@ export function getCfg() {
   };
 }
 
-/** Rejestruje wszystkie ustawienia modułu (wywołać w hooku "init"). */
+/**
+ * Registers all module settings in Foundry's settings system.
+ * Call during the 'init' hook.
+ */
 export function registerSettings() {
+  // Helper function for registering settings in Foundry's system.
+  // Registers a world-scoped setting with default config=true, type, and optional extras (e.g., range, choices).
   const r = (key, type, def, name, hint, extra = {}) =>
     game.settings.register(MODULE_ID, key, {
       name, hint,
@@ -166,14 +183,14 @@ export function registerSettings() {
       ...extra,
     });
 
-  // Język interfejsu — na górze listy
+  // Interface language setting — placed at top of settings list
   r("language", String, DEFAULTS.language,
     "PAZAAK.settingLanguage", "PAZAAK.settingLanguageHint",
     {
       choices: { pl: "PAZAAK.langPl", en: "PAZAAK.langEn" },
       onChange: (value) => {
         applyModuleLang(value);
-        // Odrysuj aplikację jeśli jest otwarta
+        // Re-render open app to apply language changes immediately
         const { PazaakApp } = globalThis._pazaakAppRef ?? {};
         PazaakApp?._instance?.render({ force: true });
       },
@@ -218,8 +235,8 @@ export function registerSettings() {
     "PAZAAK.settingRoundsToWin",      "PAZAAK.settingRoundsToWinHint",
     { range: { min: 1, max: 5, step: 1 } });
 
-  // ── Waluta zakładów ────────────────────────────────────────────────────────
-  // Choices są budowane dynamicznie — wywołujemy po "init" gdy game.system jest dostępne
+  // ── Wager currency ────────────────────────────────────────────────────────
+  // Choices built dynamically after 'init' hook when game.system is available
   const currChoices = Object.fromEntries(
     getAvailableCurrencies().map(c => [c.key, c.label])
   );
@@ -233,19 +250,20 @@ export function registerSettings() {
     choices: currChoices,
   });
 
-  // ── Stan gry (ukryty — przechowuje aktualny stan meczu) ───────────────────
+  // ── Game state (hidden setting storing current match state) ───────────────────
   game.settings.register(MODULE_ID, "pazaakState", {
     scope:   "world",
     config:  false,
     default: null,
     type:    Object,
     onChange: () => {
+      // Re-render app on state change to sync UI across clients.
       const { PazaakApp } = globalThis._pazaakAppRef ?? {};
       PazaakApp?._instance?.render({ force: true });
     },
   });
 
-  // ── Przycisk "Resetuj do domyślnych" ──────────────────────────────────────
+  // ── "Reset to defaults" menu ──────────────────────────────────────
   game.settings.registerMenu(MODULE_ID, "resetDefaults", {
     name:  "PAZAAK.settingResetName",
     label: "PAZAAK.settingResetLabel",
@@ -254,10 +272,10 @@ export function registerSettings() {
     type:  class PazaakResetDefaults extends foundry.applications.api.ApplicationV2 {
       static DEFAULT_OPTIONS = { id: "pazaak-reset-defaults", window: { title: "" } };
 
-      // Wymagana metoda abstrakcyjna — nigdy nie zostanie wywołana
+      // Required abstract method override; never called as we intercept render()
       async _renderHTML() { return ""; }
 
-      // Nadpisujemy render() — przechwytujemy PRZED super.render() który otworzyłby okno
+      // Override render() to handle reset logic without opening a window
       render(options = {}) {
         (async () => {
           const SC = foundry.applications?.settings?.SettingsConfig ?? SettingsConfig;
@@ -278,7 +296,7 @@ export function registerSettings() {
           }
           ui.notifications.info(t("notifResetDone"));
 
-          // Zamknij panel ustawień — szukamy po nazwie konstruktora, nie po id (bezpieczniej)
+          // Close settings panel by finding SettingsConfig instance (safer than by ID)
           const settingsWin = [...(foundry.applications?.instances?.values() ?? [])]
             .find(a => a.constructor?.name === "SettingsConfig");
           settingsWin?.close();
