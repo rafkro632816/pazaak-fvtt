@@ -1,6 +1,6 @@
 ﻿<div class="pzk-root">
 
-  {{!-- ================== OCZEKIWANIE NA WYBÓR TALII ================== --}}
+  {{!-- Waiting view while players choose their decks --}}
   {{#if isWaiting}}
   <div class="pzk-no-game">
     <div class="pzk-logo-glyph">⏳</div>
@@ -20,10 +20,10 @@
   </div>
   {{/if}}
 
-  {{!-- ================== BRAK GRY ================== --}}
+  {{!-- No active game state, either show victory or lobby prompt --}}
   {{#unless hasGame}}{{#unless isWaiting}}
   {{#if victoryPending}}
-  {{!-- ================== EKRAN ZWYCIĘZCY ================== --}}
+  {{!-- Victory screen shown after a round ends --}}
   <div class="pzk-victory-root">
     <div class="pzk-victory-stars pzk-victory-stars-top">⭐ ⭐ ⭐</div>
     <div class="pzk-victory-title">{{localize "PAZAAK.victoryTitle"}}</div>
@@ -44,7 +44,7 @@
     </div>
   </div>
   {{else}}
-  {{!-- ================== BRAK GRY ================== --}}
+  {{!-- Lobby state shown when no match is currently active --}}
   <div class="pzk-no-game">
     <div class="pzk-logo-glyph"><img src="modules/pazaak-fvtt/assets/Icons/pazaak_cards_icon.svg" alt="Pazaak" style="width:64px;height:64px;"></div>
     <h2 class="pzk-logo-title">Pazaak</h2>
@@ -63,11 +63,11 @@
   {{/if}}
   {{/unless}}{{/unless}}
 
-  {{!-- ================== AKTYWNA GRA ================== --}}
+  {{!-- Active game board layout and state rendering --}}
   {{#if hasGame}}
   <div class="pzk-board">
 
-    {{!-- �� G�RNY PASEK: gemy + info �� --}}
+    {{!-- Top status bar: round, target, wager, and gem progress --}}
     <div class="pzk-topbar">
       <div class="pzk-gems pzk-gems-left">
         {{#if p1}}{{#each p1.gems}}<span class="pzk-gem pzk-gem-p1 {{#if won}}pzk-gem-won{{/if}}"></span>{{/each}}{{/if}}
@@ -90,10 +90,10 @@
       </div>
     </div>
 
-    {{!-- �� G�WNE POLE GRY �� --}}
+    {{!-- Main game field with player boards and score grids --}}
     <div class="pzk-field">
 
-      {{!-- Gracz 1 --}}
+      {{!-- Player 1 board panel, including score and grid slots --}}
       {{#if p1}}
       <div class="pzk-side pzk-side-left{{#if p1.isActive}} pzk-side-active{{/if}}{{#if p1.busted}} pzk-side-bust{{/if}}{{#if p1.stood}} pzk-side-stood{{/if}}">
         <div class="pzk-side-header">
@@ -114,7 +114,7 @@
 
       <div class="pzk-divider"></div>
 
-      {{!-- Gracz 2 --}}
+      {{!-- Player 2 board panel, including score and grid slots --}}
       {{#if p2}}
       <div class="pzk-side pzk-side-right{{#if p2.isActive}} pzk-side-active{{/if}}{{#if p2.busted}} pzk-side-bust{{/if}}{{#if p2.stood}} pzk-side-stood{{/if}}">
         <div class="pzk-side-header">
@@ -135,10 +135,10 @@
 
     </div>
 
-    {{!-- �� DOLNA SEKCJA: rce + akcje �� --}}
+    {{!-- Bottom action pane for each player hand and turn controls --}}
     <div class="pzk-bottom">
 
-      {{!-- Rka gracza 1 --}}
+      {{!-- Player 1 hand panel with available moves and controls --}}
       <div class="pzk-hand-panel pzk-hand-left">
         <div class="pzk-hand-label">{{#if p1}}{{p1.name}}{{/if}} — {{localize "PAZAAK.handLabel"}}</div>
         <div class="pzk-hand-row">
@@ -177,7 +177,7 @@
         {{/if}}
       </div>
 
-      {{!-- Rka gracza 2 + kontrolki --}}
+      {{!-- Player 2 hand panel, rendered when opponent interaction is required --}}
       <div class="pzk-hand-panel pzk-hand-right">
         <div class="pzk-hand-label">{{#if p2}}{{p2.name}}{{/if}} — {{localize "PAZAAK.handLabel"}}</div>
         <div class="pzk-hand-row">
@@ -217,7 +217,7 @@
       </div>
     </div>
 
-    {{!-- �� STOPKA �� --}}
+    {{!-- Game master controls: reset and new match actions --}}
     <div class="pzk-footer">
       {{#if isGM}}
       <button type="button" class="pzk-btn pzk-btn-danger" data-action="resetGame">{{localize "PAZAAK.btnForfeit"}}</button>
