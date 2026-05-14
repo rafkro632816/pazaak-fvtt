@@ -1,8 +1,8 @@
 // ============================================================
 //  Pazaak — state.mjs
-//  Zapis / odczyt stanu gry przez game.settings (world-scope).
-//  GM zapisuje bezpośrednio; gracze wysyłają żądanie przez socket,
-//  GM je odbiera i zapisuje — sync jest automatyczny dzięki Foundry.
+//  Manage persisted game state using world-scoped game.settings.
+//  GM persists updates directly; player clients emit socket requests that the GM handles.
+//  Foundry synchronizes the stored state across connected users.
 // ============================================================
 
 import { MODULE_ID, getCfg } from "./config.mjs";
@@ -10,19 +10,25 @@ import { MODULE_ID, getCfg } from "./config.mjs";
 const SETTING_KEY = "pazaakState";
 
 /**
- * Rejestruje ukryte ustawienie świata przechowujące stan gry.
- * Wywołaj w hooku "init". onChangeFn = callback przy każdej zmianie.
+ * Register the hidden world setting used for game state persistence.
+ * This stub is kept for compatibility; registration now occurs in config.mjs.
  */
-/** @deprecated Rejestracja przeniesiona do registerSettings() w config.mjs. */
+/** @deprecated Registration moved to registerSettings() in config.mjs. */
 export function registerStateSetting(_onChangeFn) {}
 
-/** Synchronicznie odczytuje stan gry (null jeśli brak). */
+/**
+ * Read the persisted game state from world settings.
+ * Returns null when no saved state exists.
+ */
 export function loadState() {
   try { return game.settings.get(MODULE_ID, SETTING_KEY) ?? null; }
   catch { return null; }
 }
 
-/** Zapisuje stan gry. GM zapisuje bezpośrednio; gracze przez socket. */
+/**
+ * Persist the current game state.
+ * GM writes directly to game.settings; non-GM clients proxy the request via socket.
+ */
 export async function saveState(state) {
   if (game.user.isGM) {
     await game.settings.set(MODULE_ID, SETTING_KEY, foundry.utils.deepClone(state));
@@ -34,7 +40,10 @@ export async function saveState(state) {
   }
 }
 
-/** Usuwa stan gry (reset meczu). */
+/**
+ * Clear the persisted game state, resetting the saved match data.
+ * GM clears the world setting; non-GM clients request a clear via socket.
+ */
 export async function clearState() {
   if (game.user.isGM) {
     await game.settings.set(MODULE_ID, SETTING_KEY, null);
@@ -44,8 +53,8 @@ export async function clearState() {
 }
 
 /**
- * Uzupełnia brakujące pola stanu (migracja / sanity-check).
- * Wywołuj za każdym razem po loadState().
+ * Normalize and migrate loaded state objects to the current schema.
+ * This fills in default fields and guards against missing data.
  */
 export function migrateState(state) {
   const cfg = getCfg();
