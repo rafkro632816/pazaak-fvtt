@@ -27,7 +27,7 @@ The round is won by whoever has the highest score at or below the target. First 
 ## 🃏 Special Cards
 
 | Card | Effect |
-|------|--------|
+|------|--------| 
 | `+N` / `-N` | Add or subtract N from your score |
 | `+/-N` | Choose: +N or –N when played |
 | `Double` | Doubles the value of the last drawn card |
