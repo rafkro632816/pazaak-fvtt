@@ -1,38 +1,53 @@
 // ============================================================
 //  Pazaak — journal.mjs
-//  Zapis historii gier w JournalEntry "Pazaak - Games History"
+//  Game history logger: writes match events to a dedicated JournalEntry
 // ============================================================
 
 import { MODULE_ID, getCfg, t } from "./config.mjs";
 
 export const JOURNAL_NAME = "Pazaak - Games History";
 
-/** Zwraca zlokalizowaną nazwę journalu (używaj do szukania, nie do klucza i18n). */
+/**
+ * Returns the localized display name for the history journal.
+ * Use this value for lookups, not as an i18n key.
+ */
 export function getJournalName() {
   return t("journalName");
 }
 
-// ─── Pomocniki ────────────────────────────────────────────────────────────────
+// ─── Helper functions ─────────────────────────────────────────────────────────
 
+/**
+ * Returns the journal entry used for storing game history, or null if missing.
+ */
 function _getJournal() {
   return game.journal?.getName(JOURNAL_NAME) ?? null;
 }
 
+/**
+ * Pads a number to two digits for timestamp formatting.
+ */
 function _pad(n) { return String(n).padStart(2, "0"); }
 
+/**
+ * Returns a compact timestamp string used for journal page titles.
+ */
 function _timestamp() {
   const d = new Date();
   return `${d.getFullYear()}-${_pad(d.getMonth()+1)}-${_pad(d.getDate())} `
        + `${_pad(d.getHours())}:${_pad(d.getMinutes())}`;
 }
 
+/**
+ * Prefixes positive values with '+' for readable game logs.
+ */
 function _signed(n) { return n > 0 ? `+${n}` : `${n}`; }
 
-// ─── API publiczne ────────────────────────────────────────────────────────────
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Tworzy journal "Pazaak - Games History" jeśli nie istnieje.
- * Wywołaj w setupie.
+ * Ensures the history journal exists for match logging.
+ * This should be called during module setup.
  */
 export async function ensureGamesJournal() {
   if (_getJournal()) return;
@@ -40,16 +55,16 @@ export async function ensureGamesJournal() {
     name:        JOURNAL_NAME,
     ownership:   { default: 2 },
   });
-  console.log(`Pazaak | Stworzono journal "${JOURNAL_NAME}"`);
+  console.log(`Pazaak | Created journal "${JOURNAL_NAME}"`);
 }
 
 /**
- * Otwiera nową stronę w dzienniku dla bieżącego meczu.
- * Zwraca pageId do zapisania w state.
- * Tylko GM może tworzyć strony — jeśli wywołuje gracz, GM musi zainicjować mecz.
+ * Creates a new journal page for the current match and returns its pageId.
+ * The page is used to append match events during gameplay.
+ * Only the GM can create journal pages; player clients will not write directly.
  */
 export async function startGameLog(state) {
-  if (!game.user.isGM) return null; // tylko GM tworzy stronę
+  if (!game.user.isGM) return null; // only the GM creates journal pages
   const journal = _getJournal();
   if (!journal) return null;
 
@@ -73,14 +88,14 @@ export async function startGameLog(state) {
 }
 
 /**
- * Dopisuje wiersz tury do aktywnej strony.
+ * Appends a formatted turn entry to the active journal page.
  */
 export async function logTurn(state, entry) {
   await _appendHTML(state, _renderTurnRow(entry));
 }
 
 /**
- * Dopisuje wynik rundy.
+ * Appends a round result summary to the journal.
  */
 export async function logRoundEnd(state, winners, roundNum) {
   const result = !winners?.length
@@ -103,7 +118,7 @@ export async function logRoundEnd(state, winners, roundNum) {
 }
 
 /**
- * Finalizuje stronę z wynikiem meczu.
+ * Writes the final match result to the journal page.
  */
 export async function logMatchEnd(state, winners) {
   const names = winners.map(w => `<b>${w.name}</b>`).join(" & ");
@@ -114,8 +129,12 @@ export async function logMatchEnd(state, winners) {
   await _appendHTML(state, html);
 }
 
-// ─── Wewnętrzne ───────────────────────────────────────────────────────────────
+// ─── Internal helpers ───────────────────────────────────────────────────────
 
+/**
+ * Renders an individual turn log row as HTML for the journal page.
+ * @param {{name:string,card:number,hand:string|null,mod:number,total:number,stood:boolean,busted:boolean,autoStand:boolean}} e
+ */
 function _renderTurnRow(e) {
   // e = { name, card, hand, mod, total, stood, busted, autoStand }
   const handPart = e.hand ? ` + ${t("journalHandCard")} <em>${e.hand}</em> (${_signed(e.mod)})` : "";
@@ -130,6 +149,10 @@ function _renderTurnRow(e) {
        + `</p>`;
 }
 
+/**
+ * Appends HTML to the current journal page, using GM write access.
+ * Non-GM clients proxy the append request through the module socket.
+ */
 async function _appendHTML(state, html) {
   if (!state?.gamePageId) return;
   if (game.user.isGM) {

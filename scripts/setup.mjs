@@ -1,20 +1,23 @@
 // ============================================================
 //  Pazaak — setup.mjs
-//  Jednorazowy setup świata: tabele RollTable + aktor stanu
-//  Wywołaj jako GM: game.pazaak.setup()
+//  One-time world bootstrap: create RollTables and persistent state folder
+//  GM-only entrypoint: game.pazaak.setup()
 // ============================================================
 
 import { MODULE_ID, getCfg, t } from "./config.mjs";
 import { ensureGamesJournal } from "./journal.mjs";
 
-// ─── Dane talii głównej (1-10, 4 kopie każdej) ───────────────────────────────
-
+// ─── Base deck constants ───────────────────────────────────────────────────
+// Main deck card definitions used to build the RollTable results.
 const MAZZO_BASE = Array.from({ length: 10 }, (_, i) => ({
   val: i + 1,
   img: `modules/${MODULE_ID}/assets/Standard/${i + 1}.png`,
 }));
 
-/** Obrazek karty do rzeki dla setup (ta sama logika co w app.mjs). */
+/**
+ * Resolve the image path for a hand card value during world setup.
+ * Special card names map to unique assets; numeric labels map to +/- icons.
+ */
 function _handImg(label) {
   const s = String(label ?? "");
   if (s.startsWith("+/-")) return `modules/${MODULE_ID}/assets/+-/+-${s.replace("+/-", "")}.png`;
@@ -27,15 +30,15 @@ function _handImg(label) {
   return "icons/svg/d20-grey.svg";
 }
 
-// ─── Dane talii specjalnych (ręka) ────────────────────────────────────────────
-
+// ─── Standard hand card definitions ────────────────────────────────────────
+// Basic special cards available in the standard hand deck.
 const STANDARD_HAND = [
   "+1", "+2", "+3", "+4", "+5", "+6",
   "-1", "-2", "-3", "-4", "-5", "-6",
   "Double", "Tie Breaker",
 ];
 
-// Pełny zestaw kart specjalnych — źródło dla generatora
+// Complete special hand card set used by the deck generator
 const ALL_CARDS_HAND = [
   "+1", "+2", "+3", "+4", "+5", "+6",
   "-1", "-2", "-3", "-4", "-5", "-6",
@@ -46,8 +49,12 @@ const ALL_CARDS_HAND = [
 
 export const ALL_CARDS_TABLE_NAME = "Pazzak - All Cards";
 
-// ─── Eksport główny ───────────────────────────────────────────────────────────
+// ─── Public setup API ───────────────────────────────────────────────────────
 
+/**
+ * Bootstrap required Pazaak world assets in the campaign.
+ * Creates folders, RollTables, and the history journal for GM clients.
+ */
 export async function setupPazaakWorld() {
   if (!game.user.isGM) {
     ui.notifications.warn(t("notifSetupGMOnly"));
@@ -56,11 +63,11 @@ export async function setupPazaakWorld() {
 
   ui.notifications.info(t("notifSetupStart"));
 
-  // Zbuduj strukturę folderów
+  // Ensure the module folder hierarchy exists
   const rootFolder    = await _ensureFolder("Pazzak",    null);
   const baseFolder    = await _ensureFolder("Base",      rootFolder.id);
   const premadeFolder = await _ensureFolder("PreMade",   rootFolder.id);
-  await _ensureFolder("Generated", rootFolder.id); // tworzy jeśli nie istnieje
+  await _ensureFolder("Generated", rootFolder.id); // create if missing
 
   await _ensureMainTable(baseFolder.id);
   await _ensureHandTable("Pazzak - Standard",  STANDARD_HAND,  premadeFolder.id);
@@ -71,20 +78,21 @@ export async function setupPazaakWorld() {
 }
 
 /**
- * Zwraca (lub tworzy) folder Pazzak/Generated.
- * Eksportowane — używane przez DeckBuilderApp.
+ * Return or create the Pazzak/Generated folder.
+ * Exported for DeckBuilderApp usage.
  */
 export async function ensureGeneratedFolder() {
   const root = await _ensureFolder("Pazzak",    null);
   return         _ensureFolder("Generated", root.id);
 }
 
-// ─── Prywatne ──────────────────────────────────────────────────────────────────────────────────
+// Exported helper for DeckBuilderApp to ensure the generated cards folder exists.
+// ─── Internal helpers ─────────────────────────────────────────────────────────────
 
 /**
- * Zwraca istniejący folder lub tworzy nowy.
- * @param {string}      name     Nazwa folderu
- * @param {string|null} parentId ID folderu nadrzędnego (null = korzeń)
+ * Return an existing folder or create a new one.
+ * @param {string}      name     Folder name
+ * @param {string|null} parentId Parent folder ID (null = root)
  */
 async function _ensureFolder(name, parentId) {
   const existing = game.folders.find(f =>
@@ -97,6 +105,7 @@ async function _ensureFolder(name, parentId) {
 }
 
 async function _ensureMainTable(folderId) {
+  // Ensure the main Pazaak deck table exists, and move it if it is in the wrong folder.
   const name = getCfg().tableName;
   const existing = game.tables.getName(name);
   if (existing) {
@@ -106,14 +115,14 @@ async function _ensureMainTable(folderId) {
     return;
   }
 
-  // 4 kopie każdej karty → 40 wyników, zamienne
+  // Build a full base deck: 4 copies of each numeric card value
   const results = [];
   for (const { val, img } of MAZZO_BASE) {
     for (let copy = 0; copy < 4; copy++) {
       results.push({
         type:        "text",
         description: String(val),
-        text:        String(val),   // alias dla starszych wersji
+        text:        String(val),   // alias for legacy table formats
         weight:      1,
         range:       [results.length + 1, results.length + 1],
         img,
@@ -136,6 +145,7 @@ async function _ensureMainTable(folderId) {
 }
 
 async function _ensureHandTable(name, cards, folderId) {
+  // Ensure a hand card RollTable exists for the given special card set.
   const existing = game.tables.getName(name);
   if (existing) {
     if (folderId && (existing.folder?.id ?? null) !== folderId)

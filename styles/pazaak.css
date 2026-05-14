@@ -1,13 +1,13 @@
 ﻿/* ============================================================
    Pazaak Module — styles/pazaak.css
-   Motyw: metaliczna plansza KOTOR
+   Theme: Metallic KOTOR-inspired board styling
    ============================================================ */
 
-/* ─── Przycisk w pasku zakadek sidebara ─────────────────── */
+/* ─── Sidebar tab button override ────────────────────────── */
 
 a.pazaak-tab-btn { cursor: pointer !important; }
 
-/* ─── Okno aplikacji — reset padding ────────────────────── */
+/* ─── Application window content reset ───────────────────── */
 
 .app.pazaak-app .window-content,
 #pazaak-app .window-content {
@@ -17,9 +17,10 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ROOT
+   ROOT CONTAINER
    ═══════════════════════════════════════════════════════════ */
 
+/* Root flex container for the entire Pazaak UI */
 .pzk-root {
   width:       100%;
   height:      100%;
@@ -30,7 +31,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   background:  #1c1a14;
 }
 
-/* ─── BRAK GRY ───────────────────────────────────────────── */
+/* ─── No active game state display ───────────────────────── */
 
 .pzk-no-game {
   flex:            1;
@@ -44,13 +45,15 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   background:      radial-gradient(ellipse at center, #2c2820 0%, #14120e 100%);
 }
 
+/* Logo elements for no-game state */
 .pzk-logo-glyph  { font-size: 3em; }
 .pzk-logo-title  { font-size: 1.6em; color: #c8a040; letter-spacing: 3px; margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════
-   BOARD
+   GAME BOARD CONTAINER
    ═══════════════════════════════════════════════════════════ */
 
+/* Main game board with metallic gradient background */
 .pzk-board {
   display:        flex;
   flex-direction: column;
@@ -62,7 +65,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   overflow:       hidden;
 }
 
-/* ─── GÓRNY PASEK ─────────────────────────────────────────── */
+/* ─── Top information bar ────────────────────────────────── */
 
 .pzk-topbar {
   display:         flex;
@@ -112,8 +115,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 
 .pzk-meta-sep { color: #5a4e30; }
 
-/* Gemy rundy */
-
+/* Round win indicators (gems) */
 .pzk-gems {
   display: flex;
   gap:     6px;
@@ -131,19 +133,21 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   transition:    background 0.3s, box-shadow 0.3s;
 }
 
+/* Player 1 won round gem */
 .pzk-gem-p1.pzk-gem-won {
   background: radial-gradient(circle at 35% 35%, #ff6060, #aa0000);
   border-color: #cc3030;
   box-shadow: 0 0 6px rgba(200,50,50,0.7), inset 0 1px 2px rgba(255,150,150,0.4);
 }
 
+/* Player 2 won round gem */
 .pzk-gem-p2.pzk-gem-won {
   background: radial-gradient(circle at 35% 35%, #60e060, #208020);
   border-color: #40a040;
   box-shadow: 0 0 6px rgba(60,180,60,0.7), inset 0 1px 2px rgba(180,255,180,0.4);
 }
 
-/* ─── GÓWNE POLE GRY ────────────────────────────────────── */
+/* ─── Main game field (player areas) ─────────────────────── */
 
 .pzk-field {
   display:   flex;
@@ -151,8 +155,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   min-height: 0;
 }
 
-/* Strony graczy */
-
+/* Individual player side containers */
 .pzk-side {
   flex:            1;
   display:         flex;
@@ -165,20 +168,22 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   position:        relative;
 }
 
+/* Highlight for active player's turn */
 .pzk-side-active {
   background: radial-gradient(ellipse at 50% 10%, rgba(180,140,40,0.12) 0%, transparent 70%);
 }
 
+/* Highlight for busted player */
 .pzk-side-bust {
   background: radial-gradient(ellipse at 50% 10%, rgba(180,40,40,0.15) 0%, transparent 70%);
 }
 
+/* Dimmed appearance for player who stood */
 .pzk-side-stood {
   opacity: 0.75;
 }
 
-/* Nagówek strony */
-
+/* Player side header with name and deck info */
 .pzk-side-header {
   display:         flex;
   width:           100%;
@@ -209,8 +214,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   padding:        0 4px;
 }
 
-/* Status badges */
-
+/* Player status indicator badges */
 .pzk-status-badge {
   font-size:     0.65em;
   padding:       2px 6px;
@@ -230,8 +234,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   to   { opacity: 1.0; }
 }
 
-/* Wynik punktowy */
-
+/* Current score display for each player */
 .pzk-score-display {
   font-size:   2.2em;
   font-weight: bold;
@@ -241,8 +244,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   margin:      2px 0;
 }
 
-/* Siatka kart na planszy */
-
+/* Grid layout for played cards */
 .pzk-card-grid {
   display:               grid;
   grid-template-columns: repeat(3, 1fr);
@@ -250,6 +252,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   width:                 100%;
 }
 
+/* Individual card slot in the grid */
 .pzk-slot {
   aspect-ratio:  3 / 4;
   border-radius: 5px;
@@ -264,7 +267,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   overflow:      hidden;
 }
 
-/* Puste miejsce — subtelny wzór */
+/* Subtle inner border for empty slots */
 .pzk-slot:not(.pzk-slot-filled)::after {
   content:    '';
   position:   absolute;
@@ -273,20 +276,20 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   border-radius: 3px;
 }
 
-/* Karta zagrana */
+/* Base styling for occupied slots */
 .pzk-slot-filled {
   background:  linear-gradient(160deg, #2c2818 0%, #1a1610 100%);
   border-color: #4a4030;
   box-shadow:  inset 0 1px 2px rgba(255,220,100,0.08), 0 1px 3px rgba(0,0,0,0.5);
 }
 
-/* Karta z rki (modyfikator) */
+/* Modifier card from hand */
 .pzk-slot-filled.pzk-slot-hand {
   background:   linear-gradient(160deg, #1a2c18 0%, #101a10 100%);
   border-color: #304a28;
 }
 
-/* Karta oczekujca (jeszcze niezatwierdzona) */
+/* Unconfirmed pending card */
 .pzk-slot-filled.pzk-slot-pending {
   background:   linear-gradient(160deg, #2c2010 0%, #1c1608 100%);
   border-color: #c8a040;
@@ -294,6 +297,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   animation:    pzk-pulse 0.8s infinite alternate;
 }
 
+/* Card value text display */
 .pzk-slot-val {
   font-size:   0.85em;
   font-weight: bold;
@@ -301,6 +305,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
+/* Card image display */
 .pzk-slot-img {
   width:      100%;
   height:     100%;
@@ -309,23 +314,24 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   display:    block;
 }
 
+/* Color overrides for special card types */
 .pzk-slot-hand .pzk-slot-val  { color: #80c070; }
 .pzk-slot-pending .pzk-slot-val { color: #f0c840; }
 
-/* Karta podwojona przez Double */
+/* Visual indicator for doubled cards */
 .pzk-slot-doubled {
   border-color: #c0a000;
   box-shadow:   0 0 6px rgba(200,160,0,0.4), inset 0 1px 2px rgba(255,220,80,0.12);
 }
 
-/* Badge zakładu w topbarze */
+/* Wager amount display in topbar */
 .pzk-wager-badge {
   color:       #f0c040;
   font-weight: bold;
   text-shadow: 0 0 6px rgba(200,160,0,0.6);
 }
 
-/* Lista oczekiwania na wybór talii */
+/* Deck selection waiting list */
 .pzk-pick-list {
   list-style:    none;
   padding:       0;
@@ -345,7 +351,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   color:             #8ed870;
 }
 
-/* Badge ×2 na karcie podwojonej */
+/* Double multiplier badge overlay */
 .pzk-double-badge {
   position:    absolute;
   bottom:      2px;
@@ -359,11 +365,13 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   GENERATOR TALII (DeckBuilderApp)
+   DECK BUILDER APPLICATION
    ═══════════════════════════════════════════════════════════ */
 
+/* Reset padding for deck builder window */
 .pazaak-deck-builder .window-content { padding: 0; }
 
+/* Root container for deck builder UI */
 .pzk-builder-root {
   display:         flex;
   flex-direction:  column;
@@ -371,7 +379,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   background:      #1c1a14;
 }
 
-/* ── Nagłówek ── */
+/* ── Builder header section ── */
 .pzk-builder-header {
   padding:       12px 16px 8px;
   border-bottom: 1px solid #3a3020;
@@ -379,6 +387,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   flex-shrink:   0;
 }
 
+/* Mode selection row */
 .pzk-builder-mode-row {
   display:       flex;
   align-items:   center;
@@ -405,6 +414,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   outline:      none;
 }
 
+/* Deck name input row */
 .pzk-builder-name-row {
   display:     flex;
   align-items: center;
@@ -412,6 +422,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   margin-bottom: 6px;
 }
 
+/* Name input field container */
 .pzk-builder-name-field {
   flex:        1;
   display:     flex;
@@ -426,6 +437,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   box-shadow:  0 0 0 2px rgba(200,160,64,0.2);
 }
 
+/* Prefix label for deck name */
 .pzk-builder-name-prefix {
   padding:     5px 6px 5px 8px;
   color:       #8a6820;
@@ -436,6 +448,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   background:  #1a1408;
 }
 
+/* Deck name label */
 .pzk-builder-name-label {
   color:       #c8a040;
   font-weight: bold;
@@ -443,6 +456,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   font-size:   0.9em;
 }
 
+/* Visibility toggle row */
 .pzk-builder-visible-row {
   margin-bottom: 8px;
 }
@@ -461,6 +475,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   accent-color: #c8a040;
 }
 
+/* Actual text input for deck name */
 .pzk-builder-name-input {
   flex:        1;
   background:  transparent;
@@ -472,11 +487,13 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 }
 .pzk-builder-name-input:focus { outline: none; }
 
+/* Source attribution text */
 .pzk-builder-source {
   font-size:  0.78em;
   color:      #706040;
 }
 
+/* Card count display with color coding */
 .pzk-builder-count-display {
   color: #a89060;
   transition: color 0.2s;
@@ -484,7 +501,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 .pzk-builder-count-ok   { color: #60c840; }
 .pzk-builder-count-over { color: #e84040; }
 
-/* ── Siatka kart ── */
+/* ── Scrollable card selection grid ── */
 .pzk-builder-scroll {
   flex:       1;
   overflow-y: auto;
@@ -494,12 +511,14 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 .pzk-builder-scroll::-webkit-scrollbar-track { background: #1a1810; }
 .pzk-builder-scroll::-webkit-scrollbar-thumb { background: #4a3820; border-radius: 3px; }
 
+/* Responsive grid for card items */
 .pzk-builder-grid {
   display:               grid;
   grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
   gap:                   8px;
 }
 
+/* Individual card item in builder */
 .pzk-builder-card {
   display:        flex;
   flex-direction: column;
@@ -511,11 +530,13 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   padding:        6px 4px 5px;
   transition:     border-color 0.15s, background 0.15s;
 }
+/* Highlight for selected/active cards */
 .pzk-builder-card-active {
   border-color: #8a6820;
   background:   #221e10;
 }
 
+/* Card image display */
 .pzk-builder-card-img {
   width:         60px;
   height:        84px;
@@ -523,6 +544,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   border-radius: 3px;
   image-rendering: pixelated;
 }
+/* Fallback for cards without images */
 .pzk-builder-card-noimg {
   display:         flex;
   align-items:     center;
@@ -537,6 +559,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   padding:         4px;
 }
 
+/* Card name label */
 .pzk-builder-card-label {
   font-size:   0.72em;
   color:       #a09060;
@@ -546,6 +569,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   min-height:  2em;
 }
 
+/* Control buttons for adding/removing cards */
 .pzk-builder-card-controls {
   display:     flex;
   align-items: center;
@@ -569,6 +593,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 .pzk-builder-btn-ctrl:hover  { background: #3a2e14; }
 .pzk-builder-btn-ctrl:active { background: #1a1408; }
 
+/* Quantity display for card count */
 .pzk-builder-card-count {
   width:       24px;
   text-align:  center;
@@ -578,6 +603,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
 }
 .pzk-builder-count-active { color: #c8a040; }
 
+/* Empty state message */
 .pzk-builder-empty {
   text-align: center;
   color:      #5a4a28;
@@ -585,7 +611,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   font-style: italic;
 }
 
-/* ── Stopka ── */
+/* ── Builder footer with action buttons ── */
 .pzk-builder-footer {
   padding:       10px 16px;
   border-top:    1px solid #3a3020;
@@ -595,7 +621,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   flex-shrink:   0;
 }
 
-/* ─── PIONOWY ROZDZIELNIK ─────────────────────────────────── */
+/* ─── Vertical separator line ─────────────────────────────────── */
 
 .pzk-divider {
   width:      3px;
@@ -604,9 +630,8 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   flex-shrink: 0;
 }
 
-
 /* ═══════════════════════════════════════════════════════════
-   DOLNA SEKCJA: rce + kontrolki
+   BOTTOM SECTION: PLAYER HANDS + GAME CONTROLS
    ═══════════════════════════════════════════════════════════ */
 
 .pzk-bottom {
@@ -616,8 +641,7 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   min-height:    110px;
 }
 
-/* Panel rki */
-
+/* Container for each player's hand display */
 .pzk-hand-panel {
   flex:           1;
   display:        flex;
@@ -635,14 +659,14 @@ a.pazaak-tab-btn { cursor: pointer !important; }
   letter-spacing: 2px;
 }
 
-/* Rzd kart rki */
-
+/* Row of hand card slots */
 .pzk-hand-row {
   display:   flex;
   gap:       5px;
   flex-wrap: wrap;
 }
 
+/* Individual hand card slot/button */
 .pzk-hand-slot {
   width:         56px;
   height:        72px;
@@ -673,7 +697,7 @@ button.pzk-hand-slot.pzk-hand-selected {
   box-shadow:   0 0 10px rgba(240,192,60,0.7), inset 0 0 4px rgba(255,220,80,0.2);
 }
 
-/* Wskaźnik + (zielona obrączka) */
+/* Positive modifier indicator (+ cards) */
 button.pzk-hand-slot.pzk-pm-plus {
   border-color: #40c860;
   box-shadow:   0 0 8px rgba(64,200,96,0.7);
@@ -690,7 +714,7 @@ button.pzk-hand-slot.pzk-pm-plus::after {
   text-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
-/* Wskaźnik - (czerwona obrączka) */
+/* Negative modifier indicator (- cards) */
 button.pzk-hand-slot.pzk-pm-minus {
   border-color: #c84040;
   box-shadow:   0 0 8px rgba(200,64,64,0.7);
@@ -721,7 +745,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   pointer-events: none;
 }
 
-/* ─── KONTROLKI AKCJI ─────────────────────────────────────── */
+/* ─── Game action controls panel ─────────────────────────────────────── */
 
 .pzk-controls {
   display:        flex;
@@ -730,6 +754,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   margin-top:     auto;
 }
 
+/* Pending card value preview */
 .pzk-pending-info {
   display:     flex;
   align-items: center;
@@ -741,9 +766,11 @@ button.pzk-hand-slot.pzk-pm-minus::after {
 .pzk-pending-arrow { color: #6a5a30; }
 .pzk-pending-total { font-size: 1.1em; font-weight: bold; color: #d4c090; }
 
+/* Color overrides for special scores */
 .pzk-val-bust    { color: #ff5050 !important; }
 .pzk-val-perfect { color: #50ff80 !important; }
 
+/* Bust warning badge */
 .pzk-bust-badge {
   background: #7a1010; color: #ff8080;
   padding: 1px 5px; border-radius: 3px;
@@ -751,12 +778,14 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   animation: pzk-pulse 0.6s infinite alternate;
 }
 
+/* Perfect score badge */
 .pzk-perfect-badge {
   background: #104a20; color: #60ff90;
   padding: 1px 5px; border-radius: 3px;
   font-size: 0.75em; font-weight: bold;
 }
 
+/* Hand card selection controls */
 .pzk-hand-select-row {
   display:     flex;
   align-items: center;
@@ -780,6 +809,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   gap:     6px;
 }
 
+/* Waiting state message */
 .pzk-waiting {
   font-size:  0.8em;
   color:      #5a5030;
@@ -787,7 +817,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   padding:    4px 0;
 }
 
-/* ─── PRZYCISKI ───────────────────────────────────────────── */
+/* ─── Game action buttons ───────────────────────────────────────────── */
 
 .pzk-btn {
   padding:       5px 12px;
@@ -806,6 +836,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
 
 .pzk-btn-big { padding: 7px 18px; font-size: 0.9em; }
 
+/* Primary action button style */
 .pzk-btn-gold {
   background: linear-gradient(180deg, #c8a040 0%, #8a6820 100%);
   color:      #1a1408;
@@ -813,6 +844,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   border:     1px solid #a08030;
 }
 
+/* Secondary button style */
 .pzk-btn-silver {
   background: linear-gradient(180deg, #a0a0a0 0%, #606060 100%);
   color:      #1a1a1a;
@@ -820,19 +852,21 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   border:     1px solid #808080;
 }
 
+/* Destructive action button */
 .pzk-btn-danger {
   background: linear-gradient(180deg, #8a2020 0%, #4a1010 100%);
   color:      #ffaaaa;
   border:     1px solid #aa3030;
 }
 
+/* Neutral/cancel button */
 .pzk-btn-neutral {
   background: linear-gradient(180deg, #3a3020 0%, #1e1c10 100%);
   color:      #a89060;
   border:     1px solid #5a4a28;
 }
 
-/* ─── STOPKA ──────────────────────────────────────────────── */
+/* ─── Application footer ──────────────────────────────────────────────── */
 
 .pzk-footer {
   display:         flex;
@@ -844,14 +878,14 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   border-top:      1px solid #2a2418;
 }
 
-/* ─── Dialog wyboru talii ─────────────────────────────────── */
+/* ─── Deck selection modal dialog ─────────────────────────────────── */
 
 .pazaak-deck-selection { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
 .pazaak-deck-row       { display: flex; flex-direction: column; gap: 4px; }
 .pazaak-deck-label     { font-size: 13px; }
 .pazaak-deck-select    { width: 100%; }
 
-/* ─── Karty z ręki — przyciski wyboru ──────────────────────── */
+/* ─── Hand card selection interface ──────────────────────── */
 
 .pzk-hand-cards-select {
   display:   flex;
@@ -860,6 +894,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   margin:    4px 0;
 }
 
+/* Individual hand card selection button */
 .pzk-hand-card-btn {
   min-width:   36px;
   padding:     4px 10px;
@@ -884,6 +919,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   border-color: #f0c060;
 }
 
+/* Display for chosen card value */
 .pzk-hand-card-chosen {
   color:       #c8a040;
   font-weight: bold;
@@ -892,13 +928,14 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   text-align:  center;
 }
 
+/* Warning hint text */
 .pzk-hint-warn {
   font-size: 0.75em;
   color:     #aa6040;
   margin:    2px 0;
 }
 
-/* ═══ EKRAN ZWYCIĘZCY ════════════════════════════════════════════════════════ */
+/* ═══ VICTORY SCREEN DIALOG ════════════════════════════════════════════════════════ */
 
 .pzk-victory-root {
   display:         flex;
@@ -914,6 +951,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   background:      radial-gradient(ellipse at center top, #1e1608 0%, #0a0800 100%);
 }
 
+/* Decorative star symbols */
 .pzk-victory-stars {
   font-size:   1.4em;
   letter-spacing: 6px;
@@ -922,6 +960,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   line-height: 1;
 }
 
+/* Victory title text */
 .pzk-victory-title {
   font-size:   2em;
   font-weight: bold;
@@ -932,6 +971,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   margin:      4px 0 8px;
 }
 
+/* Winner portrait container */
 .pzk-victory-portrait-wrap {
   width:         240px;
   height:        240px;
@@ -942,6 +982,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   background:    #0a0800;
 }
 
+/* Winner portrait image */
 .pzk-victory-portrait {
   width:       100%;
   height:      100%;
@@ -949,6 +990,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   display:     block;
 }
 
+/* Winner name display */
 .pzk-victory-name {
   font-size:   1.5em;
   font-weight: bold;
@@ -957,6 +999,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
+/* Wager winnings display */
 .pzk-victory-wager {
   font-size:   1.25em;
   font-weight: bold;
@@ -969,6 +1012,7 @@ button.pzk-hand-slot.pzk-pm-minus::after {
   letter-spacing: 1px;
 }
 
+/* Victory dialog footer */
 .pzk-victory-footer {
   margin-top: 6px;
 }
