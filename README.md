@@ -1,13 +1,16 @@
-# Pazaak — Foundry VTT Module+
+<p align="center">
+    <img src="https://img.shields.io/badge/foundryvirtualtabletop-13--14-orange?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Compatible%20Version" alt="Foundry Core Compatible Version"/>
+    <img src="https://img.shields.io/badge/foundryvirtualtabletop-13-green?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Verified%20Version" alt="Foundry Core Verified Version"/>
+    <img src="assets\Cover\Pazaak - Star Wars Card Game.png" alt="Logo" style="max-width:1000%;" />
+</p>
 
-![Foundry Core Compatible Version](https://img.shields.io/badge/foundryvirtualtabletop-13--14-orange?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Compatible%20Version)
-![Foundry Core Verified Version](https://img.shields.io/badge/foundryvirtualtabletop-13-green?logo=foundryvirtualtabletop&logoColor=%23FE6A1F&label=Foundry%20Verified%20Version)
+# <p align="center">Pazaak — Foundry VTT Module+</p>
 
 A Pazaak card game from Star Wars for 2 players, implemented as a Foundry VTT module (v13+). System-agnostic.
 
 ---
 
-## How to Play
+## 🎲 How to Play
 
 Each player draws a card from the main deck (values 1–10) and adds it to their score. The goal is to reach exactly **20** (configurable). Going over is a **bust** — you lose the round. Players can also play a special card from their hand to adjust their score, then choose to **end their turn** or **stand** (lock their score for the round).
 
@@ -19,7 +22,7 @@ The round is won by whoever has the highest score at or below the target. First 
 
 ---
 
-## Special Cards
+## 🃏 Special Cards
 
 | Card | Effect |
 |------|--------|
@@ -31,7 +34,7 @@ The round is won by whoever has the highest score at or below the target. First 
 
 ---
 
-## Features
+## ✨ Features
 
 - **Pazaak window** — live game board for both players, hand cards, action buttons, and a victory screen with portrait and wager info after the match
 - **Deck Builder** — create and edit custom special card decks (RollTables); assign a deck to a specific actor by naming it `Pazzak - ActorName`
@@ -41,7 +44,7 @@ The round is won by whoever has the highest score at or below the target. First 
 
 ---
 
-## Settings
+## ⚙ Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -58,3 +61,15 @@ The round is won by whoever has the highest score at or below the target. First 
 | Target score | `20` | Score to aim for |
 | Rounds to win | `3` | Rounds needed to win the match |
 | Wager currency | auto | Currency used for wagers (auto-detected from game system) |
+
+---
+
+## 📷 Preview
+
+| Start screen | Game board |
+|:---:|:---:|
+| ![Start screen](assets\Preview\Launch.png) | ![Game board](assets\Preview\Game.png) |
+
+| Deck Builder | Choose decks |
+|:---:|:---:|
+| ![Deck Builder](assets\Preview\Deck_Generator.png) | ![Choose decks](assets\Preview\Start.png) |
