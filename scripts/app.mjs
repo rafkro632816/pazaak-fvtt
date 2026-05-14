@@ -1,6 +1,6 @@
 // ============================================================
 //  Pazaak — app.mjs
-//  Główna aplikacja UI: ApplicationV2 + HandlebarsApplicationMixin
+//  Main UI application: ApplicationV2 + HandlebarsApplicationMixin
 // ============================================================
 
 import { MODULE_ID, getCfg, t, getAvailableCurrencies, getActiveCurrency } from "./config.mjs";
@@ -10,14 +10,14 @@ import { startMatch, resolveTurn, normalizeTurn,
 import { parseCardValue, signed, chat }               from "./ui.mjs";
 import { DeckBuilderApp }                             from "./deck-builder.mjs";
 
-/** Dekoduje HTML entities z tekstów Foundry DB (np. "&amp;" → "&"). */
+/** Decodes HTML entities from Foundry DB texts (e.g., "&amp;" → "&"). */
 function _decodeHtml(str) {
   const txt = document.createElement("textarea");
   txt.innerHTML = String(str);
   return txt.value;
 }
 
-/** Buduje tablicę klikalnych kart z ręki (obsługuje +/- jako dwa przyciski). */
+/** Builds an array of clickable hand cards (handles +/- as two buttons). */
 function buildHandCards(hand) {
   return hand.flatMap((card, i) => {
     const label = card.label ?? "";
@@ -33,7 +33,7 @@ function buildHandCards(hand) {
   });
 }
 
-/** Zwraca ścieżkę do obrazka karty z ręki na podstawie etykiety (+N, -N, +/-N, Special). */
+/** Returns the path to the hand card image based on the label (+N, -N, +/-N, Special). */
 function handCardImg(label) {
   const s = String(label ?? "");
   const pm  = s.match(/^\+\/-?(\d+)$/);
@@ -83,13 +83,13 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {PazaakApp|null} */
   static _instance = null;
 
-  /** Karta dobrana ale jeszcze nie zatwierdzona przez gracza. */
+  /** Card drawn but not yet confirmed by the player. */
   _pending = null; // { playerId, val, img, newTotal }
 
-  /** Czy ekran zwycięzcy jest aktualnie wyświetlony (blokuje przyciski startu). */
+  /** Whether the victory screen is currently displayed (blocks start buttons). */
   static _victoryOpen = false;
 
-  /** Dane zwycięzcy do wyświetlenia w oknie. */
+  /** Winner data to display in the window. */
   static _victoryData = null;
 
   // ── Singleton ─────────────────────────────────────────────────────────────
@@ -106,15 +106,20 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   // ── Context ───────────────────────────────────────────────────────────────
 
+  /**
+   * Prepares the context data for the Handlebars template.
+   * Builds player data, including board slots, hand slots, and pending card state.
+   * Handles victory screen display and waiting states.
+   */
   async _prepareContext(options) {
     const cfg   = getCfg();
     const state = loadState();
 
     if (!state) {
-      // Ekran zwycięzcy — pokaż w oknie zamiast na osobnym oknie
+        // Display victory screen in the main app window instead of a separate popup for better UX.
       if (PazaakApp._victoryOpen && PazaakApp._victoryData) {
         const vd = PazaakApp._victoryData;
-        // Rozstrzygnij portret w momencie renderowania
+        // Resolve portrait dynamically at render time: prefer token image, fallback to actor image.
         let portrait = "icons/svg/mystery-man.svg";
         const actor  = game.actors?.get(vd.actorId);
         if (actor?.img) portrait = actor.img;
@@ -126,7 +131,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
       return { hasGame: false, cfg, isGM: game.user.isGM, victoryPending: false };
     }
 
-    // Oczekiwanie na wybór talii przez graczy
+    // Waiting for players to choose decks
     if (this._waitingForPicks) {
       return {
         hasGame:        false,
@@ -154,7 +159,8 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
                       : isActive  ? "active"
                                   : "wait";
 
-      // Sloty planszy: karty dobrane + zagrane karty z ręki
+      // Board slots: array of up to MAX_GRID positions representing drawn cards and played hand cards on the board.
+      // Each slot has properties: filled (boolean), value (string), img (string), isHand (boolean), isPending (boolean), doubled (boolean).
       const cardImg = (v) => {
         const n = Math.abs(v);
         return (n >= 1 && n <= 10) ? `modules/${MODULE_ID}/assets/Standard/${n}.png` : null;
@@ -168,7 +174,8 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const hm of (p.handMods ?? [])) gridSlots.push({ filled: true, value: String(hm), img: handCardImg(hm), isHand: true, isPending: false, doubled: false });
       while (gridSlots.length < MAX_GRID)  gridSlots.push({ filled: false });
 
-      // Sloty ręki (tylko wartości dla właściciela)
+      // Hand slots: array of hand cards for the player, shown as buttons or hidden values.
+      // Only the owner sees actual card values for privacy; others see placeholders.
       const handSlots = (p.hand ?? []).map((c, handIdx) => {
         const label  = _decodeHtml(c.label ?? "");
         const isPM   = String(label).includes("+/-");
@@ -191,7 +198,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       });
 
-      // Gemy zwycięstw rundy
+      // Round win gems: visual indicators for won rounds, up to cfg.roundsToWin.
       const gems = Array.from({ length: cfg.roundsToWin }, (_, gi) => ({
         won: gi < (p.roundWins ?? 0),
       }));
@@ -214,6 +221,8 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     let pending = null;
     if (this._pending) {
+      // Handle pending card: a drawn card not yet confirmed, shown temporarily on the board.
+      // Calculate new total and bust/perfect status for preview.
       const mp      = myActivePlayer ?? players.find(p => p.actorId === this._pending.playerId);
       const isBust  = this._pending.newTotal > state.target;
       const isPerfect = this._pending.newTotal === state.target;
@@ -282,9 +291,9 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this._pending = null;
 
-    // Pokaż dialog wyboru talii dla każdego gracza
+    // Show deck selection dialog for each player
     const dialogResult = await _showDeckSelectionDialog(tokens);
-    if (dialogResult === null) return; // anulowano
+    if (dialogResult === null) return; // canceled
     const { deckMap, wager, currency, playerPickMode } = dialogResult;
 
     if (playerPickMode) {
@@ -335,7 +344,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
       newTotal: player.score + cardVal,
     };
 
-    // Poinformuj inne klienty o dobranej karcie
+    // Broadcast pending card to other clients for real-time UI sync.
     game.socket.emit(`module.${MODULE_ID}`, { type: "setPending", pending: this._pending });
 
     this.render({ force: true });
@@ -350,9 +359,8 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this._pending = null;
     game.socket.emit(`module.${MODULE_ID}`, { type: "clearPending" });
     await resolveTurn(state, playerId, val, handCard, false);
-    // GM: onChange nie odpali się u siebie automatycznie — renderuj ręcznie
-    // non-GM: saveState wewnątrz resolveTurn wysyła stan do GM przez socket;
-    //         onChange odpali się gdy GM zapisze → wszyscy re-renderują
+    // Foundry's onChange hook for settings doesn't trigger on the GM's own client after saving.
+    // Other clients receive the update via socket, but GM must manually re-render their UI.
     if (game.user.isGM) this.render({ force: true });
   }
 
@@ -384,7 +392,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const cardIndex = target.dataset.cardIndex;
       const pmState   = target.dataset.pmState ?? "none";
       const isTB      = target.dataset.isTieBreaker === "true";
-      // Tie Breaker: wartość ±1, ale label to zawsze "Tie Breaker" (aby game.mjs ustawił flagę)
+    // Tie Breaker card: applies ±1 value, but uses fixed label to trigger tie logic in game.mjs.
       const lbPlus  = isTB ? "Tie Breaker" : `+${n}`;
       const lbMinus = isTB ? "Tie Breaker" : `-${n}`;
 
@@ -456,7 +464,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
         + (total > target_   ? " pzk-val-bust"
          : total === target_ ? " pzk-val-perfect" : "");
 
-      // Aktualizuj badge BUST / PERFECT dynamicznie
+      // Dynamically update BUST/PERFECT badges based on the new total with pending card.
       const bustBadge    = this.element.querySelector(".pzk-bust-badge");
       const perfectBadge = this.element.querySelector(".pzk-perfect-badge");
       if (bustBadge)    bustBadge.style.display    = total > target_   ? "" : "none";
@@ -472,7 +480,7 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!ok) return;
     this._pending = null;
     const state = loadState();
-    // Zwróć zakład każdemu graczowi przed kasowaniem stanu
+      // Refund wager to each player before clearing game state to avoid losing currency.
     if (state?.wager > 0) {
       for (const id of state.playerIds ?? []) {
         await adjustCurrency(id, state.wager, state.wagerCurrency);
@@ -509,6 +517,12 @@ export class PazaakApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 // ── Private helpers ───────────────────────────────────────────────────────────
 
+/**
+ * Shows a confirmation dialog using DialogV2 or fallback to old Dialog.
+ * @param {string} title - Dialog title.
+ * @param {string} content - Dialog content.
+ * @returns {Promise<boolean>} True if confirmed.
+ */
 async function _confirm(title, content) {
   const DV2 = foundry.applications?.api?.DialogV2;
   if (DV2) {
@@ -520,17 +534,17 @@ async function _confirm(title, content) {
 }
 
 /**
- * Wyświetla dialog wyboru talii ręki przed startem meczu.
+ * Displays the hand deck selection dialog before starting the match.
  * @param {Token[]} tokens
  * @returns {Promise<{deckMap: Record<string,string>, wager: number, currency: string}|null>}
- *   Mapa actorId → nazwa tabeli + kwota zakładu + klucz waluty, lub null jeśli anulowano.
+ *   Map actorId → table name + wager amount + currency key, or null if canceled.
  */
 async function _showDeckSelectionDialog(tokens) {
   const cfg = getCfg();
   const activeCurrency = getActiveCurrency();
   const allCurrencies  = getAvailableCurrencies();
 
-  // Zbierz dostępne RollTable (tylko talie zaczynające się od "Pazzak", bez głównej talii)
+  // Collect available RollTable (only decks starting with "Pazzak", without the main deck)
   const allTables = game.tables.contents
     .filter(t => t.name !== cfg.tableName && t.name.startsWith("Pazzak"))
     .map(t => t.name)
@@ -541,12 +555,12 @@ async function _showDeckSelectionDialog(tokens) {
     return null;
   }
 
-  // Buduj wiersz selekta dla każdego gracza
+  // Build a select row for each player
   const rows = tokens.map((tok, i) => {
     const actorName     = tok.actor?.name ?? `${t("statusWait")} ${i + 1}`;
     const actorId       = tok.actor?.id;
     const actorType     = tok.actor?.type ?? "npc";
-    // Próbuj wstępnie zaznaczyć tabelę specyficzną lub fallback
+    // Try to pre-select a specific table or fallback
     const specificName  = `${cfg.handTablePrefix}${actorName}`;
     const defaultDeck   = game.tables.getName(specificName)?.name
                        ?? game.tables.getName(cfg.fallbackHandTableName)?.name
@@ -591,7 +605,7 @@ async function _showDeckSelectionDialog(tokens) {
       <p style="font-size:0.8em;color:#808060;margin:4px 0 0">${t("wagerHint")}</p>
     </div>`;
 
-  // Helper: podłącz listener chowający wiersze character
+    // Helper: attach listener to hide character rows when player pick mode is enabled.
   function _attachPickModeListener(root) {
     const cb   = root.querySelector("[name='pazaak-player-pick-mode']");
     const rows = root.querySelectorAll("[data-actor-type='character']");
@@ -601,7 +615,7 @@ async function _showDeckSelectionDialog(tokens) {
     });
   }
 
-  // DialogV2 (v14) lub stary Dialog
+  // Use DialogV2 (Foundry v14+) for modern dialog, fallback to old Dialog for compatibility.
   const DV2 = foundry.applications?.api?.DialogV2;
   let formEl = null;
 
@@ -629,7 +643,7 @@ async function _showDeckSelectionDialog(tokens) {
     });
     if (!result) return null;
   } else {
-    // Fallback stary Dialog
+    // Fallback old Dialog
     const picked = await new Promise(resolve => {
       let res = null;
       new Dialog({
@@ -650,13 +664,13 @@ async function _showDeckSelectionDialog(tokens) {
     if (!picked) return null;
   }
 
-  // Odczytaj wybory z formularza
+  // Read choices from the form
   const playerPickMode = !!(formEl?.querySelector("[name='pazaak-player-pick-mode']")?.checked);
   const deckMap = {};
   for (const tok of tokens) {
     const id  = tok.actor?.id;
     if (!id) continue;
-    // Gdy gracz wybiera sam swoją talię, pomijamy character (będą wybierać przez dialog)
+    // When players choose their own decks, skip character tokens (they will select via dialog)
     if (playerPickMode && tok.actor?.type === "character") continue;
     const sel = formEl?.querySelector(`[name="deck-${id}"]`);
     deckMap[id] = sel?.value ?? cfg.fallbackHandTableName;
@@ -666,8 +680,16 @@ async function _showDeckSelectionDialog(tokens) {
   return { deckMap, wager, currency, playerPickMode };
 }
 
-// ── Tryb wyboru talii przez graczy ────────────────────────────────────────────
+// ── Player deck selection mode ────────────────────────────────────────────
 
+/**
+ * Starts the player deck selection mode for character tokens.
+ * NPCs use pre-selected decks, characters choose via dialog.
+ * @param {Token[]} tokens - All selected tokens.
+ * @param {number} wager - Wager amount.
+ * @param {string} currency - Currency key.
+ * @param {Record<string,string>} npcDeckMap - Pre-selected decks for NPCs.
+ */
 async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
   const cfg    = getCfg();
   const tables = game.tables.contents
@@ -675,11 +697,11 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
     .map(t => t.name)
     .sort((a, b) => a.localeCompare(b));
 
-  // Rozdziel na postacie graczy i NPC
+  // Split into player characters and NPCs
   const charTokens = tokens.filter(tok => tok.actor?.type === "character");
   const npcTokens  = tokens.filter(tok => tok.actor?.type !== "character");
 
-  // Domyślne talie tylko dla postaci graczy (NPC mają już wybrane)
+  // Default decks only for player characters (NPCs already have chosen)
   const defaults = {};
   for (const tok of charTokens) {
     const specificName = `${cfg.handTablePrefix}${tok.actor.name}`;
@@ -689,7 +711,7 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
       tables[0] ?? "";
   }
 
-  // NPC są już wstępnie rozwiązane
+  // NPC decks are pre-selected from the dialog.
   const collected   = new Map(Object.entries(npcDeckMap));
   const playerList  = tokens.map(tok => ({
     actorId: tok.actor.id,
@@ -707,7 +729,7 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
   };
 
   if (charTokens.length === 0) {
-    // Brak postaci gracza — gra startuje od razu
+    // No player characters — game starts immediately
     const deckMap = Object.fromEntries(collected);
     this._waitingForPicks = null;
     await startMatch(tokens, deckMap, wager, currency);
@@ -715,7 +737,7 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
     return;
   }
 
-  // Broadcast do wszystkich klientów TYLKO dla postaci graczy
+  // Broadcast deck pick request only to player characters; NPCs use pre-selected decks.
   game.socket.emit(`module.${MODULE_ID}`, {
     type:       "requestDeckPick",
     actorIds:   charTokens.map(tok => tok.actor.id),
@@ -724,7 +746,7 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
     defaults,
   });
 
-  // GM pokazuje dialog tylko dla postaci graczy BEZ połączonego gracza
+  // GM handles deck selection for player characters without an active connected user.
   for (const tok of charTokens) {
     const hasConnectedPlayer = game.users.contents.some(
       u => !u.isGM && u.active && tok.actor.testUserPermission(u, "OWNER")
@@ -738,8 +760,8 @@ async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
 }
 
 /**
- * Wywoływane gdy gracz (lub GM) potwierdzi wybór talii.
- * Eksportowane — wywoływane z pazaak.mjs przez socket.
+ * Called when a player (or GM) confirms deck choice.
+ * Exported — called from pazaak.mjs via socket.
  */
 export function onDeckPickResponse(actorId, deckName) {
   const app = PazaakApp._instance;
@@ -761,12 +783,12 @@ export function onDeckPickResponse(actorId, deckName) {
 }
 
 /**
- * Pokazuje graczowi dialog wyboru talii.
- * Jeśli GM — odpowiada lokalnie; jeśli gracz — przez socket.
- * Eksportowane — wywoływane z pazaak.mjs.
+ * Shows the player the deck selection dialog.
+ * If GM — responds locally; if player — via socket.
+ * Exported — called from pazaak.mjs.
  */
 export async function showPlayerDeckPickDialog(actorId, actorName, tables, defaultDeck) {
-  // Gracz widzi tylko talie, do których ma co najmniej LIMITED dostęp
+  // Players see only decks they have at least LIMITED permission to, for security.
   const visibleTables = tables.filter(name => {
     const tbl = game.tables.getName(name);
     return !tbl || game.user.isGM || tbl.testUserPermission(game.user, "LIMITED");
@@ -777,7 +799,7 @@ export async function showPlayerDeckPickDialog(actorId, actorName, tables, defau
     return;
   }
 
-  // Upewnij się, że domyślna talia jest widoczna; jeśli nie — użyj pierwszej dostępnej
+  // Make sure the default deck is visible; if not — use the first available deck
   const safeDefault = visibleTables.includes(defaultDeck) ? defaultDeck : visibleTables[0];
 
   const options = visibleTables.map(name =>
@@ -831,6 +853,11 @@ export async function showPlayerDeckPickDialog(actorId, actorName, tables, defau
   _sendDeckPickResponse(actorId, deckName);
 }
 
+/**
+ * Sends the deck pick response: locally if GM, via socket if player.
+ * @param {string} actorId - Actor ID.
+ * @param {string} deckName - Selected deck name.
+ */
 function _sendDeckPickResponse(actorId, deckName) {
   if (game.user.isGM) {
     onDeckPickResponse(actorId, deckName);
