@@ -15,23 +15,27 @@ jobs:
           URL="${{ github.event.issue.html_url }}"
           NUMBER="${{ github.event.issue.number }}"
           ACTION="${{ github.event.action }}"
+          DESCRIPTION="${{ github.event.issue.body }}"
 
           case "$ACTION" in
-            opened)   LABEL="Nowe zgłoszenie" ; COLOR=1441536 ;;
-            closed)   LABEL="Zgłoszenie zamknięte" ; COLOR=8421504 ;;
-            reopened) LABEL="Zgłoszenie ponownie otwarte" ; COLOR=16744272 ;;
+            opened)   LABEL="New issue" ; COLOR=1441536 ;;
+            closed)   LABEL="Issue closed" ; COLOR=16711680 ;;
+            reopened) LABEL="Issue reopened" ; COLOR=16744272 ;;
           esac
 
           curl -s -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d "{
+              \"content\": \"<@&1504461859997351946>\",
+              \"allowed_mentions\": { \"roles\": [\"1504461859997351946\"] },
               \"embeds\": [{
                 \"title\": \"#$NUMBER — $TITLE\",
                 \"url\": \"$URL\",
                 \"color\": $COLOR,
                 \"fields\": [
-                  { \"name\": \"Autor\", \"value\": \"$AUTHOR\", \"inline\": true },
-                  { \"name\": \"Status\", \"value\": \"$LABEL\", \"inline\": true }
+                  { \"name\": \"Author\", \"value\": \"$AUTHOR\", \"inline\": true },
+                  { \"name\": \"Status\", \"value\": \"$LABEL\", \"inline\": true },
+                  { \"name\": \"Description\", \"value\": \"$DESCRIPTION\", \"inline\": true}
                 ],
                 \"footer\": { \"text\": \"Pazaak — issue tracker\" }
               }]

@@ -1,0 +1,46 @@
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send PR notification to Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL_MERGE_PR }}
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          URL="${{ github.event.pull_request.html_url }}"
+          NUMBER="${{ github.event.pull_request.number }}"
+          ACTION="${{ github.event.action }}"
+          MERGED="${{ github.event.pull_request.merged }}"
+
+          if [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+            LABEL="PR merged" ;
+            COLOR=1441536
+          else
+            case "$ACTION" in
+              opened)   LABEL="New Pull Request" ; COLOR=13801762 ;;
+              closed)   LABEL="PR closed"      ; COLOR=16711680 ;;
+              reopened) LABEL="PR reopened" ; COLOR=16744272 ;;
+            esac
+          fi
+
+          curl -s -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"<@&1504461859997351946>\",
+              \"allowed_mentions\": { \"roles\": [\"1504461859997351946\"] },
+              \"embeds\": [{
+                \"title\": \"#$NUMBER — $TITLE\",
+                \"url\": \"$URL\",
+                \"color\": $COLOR,
+                \"fields\": [
+                  { \"name\": \"Author\", \"value\": \"$AUTHOR\", \"inline\": true },
+                  { \"name\": \"Status\", \"value\": \"$LABEL\", \"inline\": true }
+                ],
+                \"footer\": { \"text\": \"Pazaak — pull request\" }
+              }]
+            }"
