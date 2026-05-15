@@ -2,7 +2,10 @@
   "id": "pazaak-fvtt",
   "title": "Pazaak — Star Wars Card Game",
   "description": "A module that adds the Pazaak card game from the Star Wars universe to Foundry VTT.",
-  "version": "1.0.0",
+  "version": "#{VERSION}#",
+  "url": "#{URL}#",
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
   "compatibility": {
     "minimum": "13",
     "verified": "14"
