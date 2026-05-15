@@ -45,7 +45,7 @@ A Pazaak card game from Star Wars for 2 players, implemented as a Foundry VTT mo
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| Language | `pl` | Interface language (`pl` / `en`) |
+| Language | `en` | Interface language (`pl` / `en`) |
 | Main deck table | `Pazaak - Main Deck` | RollTable with cards 1–10 |
 | Default hand deck | `Pazaak - Standard` | Fallback special card deck |
 | Hand deck prefix | `Pazaak - ` | Module looks for `Pazaak - ActorName` first |
