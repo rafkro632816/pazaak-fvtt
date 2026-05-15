@@ -226,7 +226,7 @@ Hooks.once("ready", () => {
 async function _autoSetup() {
   const cfg = getCfg();
   const needsSetup = !game.tables.getName(cfg.tableName)
-                  || !game.tables.getName("Pazzak - Standard")
+                  || !game.tables.getName("Pazaak - Standard")
                   || !game.journal?.getName(JOURNAL_NAME);
   if (needsSetup) {
     console.log(`${MODULE_ID} | Pierwsze uruchomienie — auto-setup…`);

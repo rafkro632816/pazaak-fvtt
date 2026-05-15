@@ -51,9 +51,9 @@ export function t(key, data = {}) {
 /** Default configuration values, used before game.settings loads. */
 export const DEFAULTS = {
   language:              "en",
-  tableName:             "Pazaak - Cukier base",
-  handTablePrefix:       "Pazzak - ",
-  fallbackHandTableName: "Pazzak - Standard",
+  tableName:             "Pazaak - Main Deck",
+  handTablePrefix:       "Pazaak - ",
+  fallbackHandTableName: "Pazaak - Standard",
   handSize:              4,
   maxHandPlays:          3,
   handCardsLimitScope:   "match",   // "match" | "round"

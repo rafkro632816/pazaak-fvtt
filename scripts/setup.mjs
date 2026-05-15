@@ -47,7 +47,7 @@ const ALL_CARDS_HAND = [
   "Flip 1&2", "Flip 3&4", "Flip 5&6",
 ];
 
-export const ALL_CARDS_TABLE_NAME = "Pazzak - All Cards";
+export const ALL_CARDS_TABLE_NAME = "Pazaak - All Cards";
 
 // ─── Public setup API ───────────────────────────────────────────────────────
 
@@ -64,13 +64,13 @@ export async function setupPazaakWorld() {
   ui.notifications.info(t("notifSetupStart"));
 
   // Ensure the module folder hierarchy exists
-  const rootFolder    = await _ensureFolder("Pazzak",    null);
+  const rootFolder    = await _ensureFolder("Pazaak",    null);
   const baseFolder    = await _ensureFolder("Base",      rootFolder.id);
   const premadeFolder = await _ensureFolder("PreMade",   rootFolder.id);
   await _ensureFolder("Generated", rootFolder.id); // create if missing
 
   await _ensureMainTable(baseFolder.id);
-  await _ensureHandTable("Pazzak - Standard",  STANDARD_HAND,  premadeFolder.id);
+  await _ensureHandTable("Pazaak - Standard",  STANDARD_HAND,  premadeFolder.id);
   await _ensureHandTable(ALL_CARDS_TABLE_NAME, ALL_CARDS_HAND, premadeFolder.id);
   await ensureGamesJournal();
 
@@ -78,11 +78,11 @@ export async function setupPazaakWorld() {
 }
 
 /**
- * Return or create the Pazzak/Generated folder.
+ * Return or create the Pazaak/Generated folder.
  * Exported for DeckBuilderApp usage.
  */
 export async function ensureGeneratedFolder() {
-  const root = await _ensureFolder("Pazzak",    null);
+  const root = await _ensureFolder("Pazaak",    null);
   return         _ensureFolder("Generated", root.id);
 }
 
