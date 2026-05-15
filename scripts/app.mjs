@@ -544,9 +544,9 @@ async function _showDeckSelectionDialog(tokens) {
   const activeCurrency = getActiveCurrency();
   const allCurrencies  = getAvailableCurrencies();
 
-  // Collect available RollTable (only decks starting with "Pazzak", without the main deck)
+  // Collect available RollTable (only decks starting with "Pazaak", without the main deck)
   const allTables = game.tables.contents
-    .filter(t => t.name !== cfg.tableName && t.name.startsWith("Pazzak"))
+    .filter(t => t.name !== cfg.tableName && t.name.startsWith("Pazaak"))
     .map(t => t.name)
     .sort((a, b) => a.localeCompare(b));
 
@@ -693,7 +693,7 @@ async function _showDeckSelectionDialog(tokens) {
 async function _startPlayerPickMode(tokens, wager, currency, npcDeckMap = {}) {
   const cfg    = getCfg();
   const tables = game.tables.contents
-    .filter(t => t.name !== cfg.tableName && t.name.startsWith("Pazzak"))
+    .filter(t => t.name !== cfg.tableName && t.name.startsWith("Pazaak"))
     .map(t => t.name)
     .sort((a, b) => a.localeCompare(b));
 

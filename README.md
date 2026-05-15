@@ -34,7 +34,7 @@ A Pazaak card game from Star Wars for 2 players, implemented as a Foundry VTT mo
 ## ✨ Features
 
 - **Pazaak window** — live game board for both players, hand cards, action buttons, and a victory screen with portrait and wager info after the match
-- **Deck Builder** — create and edit custom special card decks (RollTables); assign a deck to a specific actor by naming it `Pazzak - ActorName`
+- **Deck Builder** — create and edit custom special card decks (RollTables); assign a deck to a specific actor by naming it `Pazaak - ActorName`
 - **Wager system** — set a wager before the match; winner takes the pot, tie refunds both players; auto-detects currency from the active game system
 - **Match log** — every match is saved as a journal entry with full turn-by-turn history
 - **Languages** — English and Polish (configurable per world)
@@ -46,9 +46,9 @@ A Pazaak card game from Star Wars for 2 players, implemented as a Foundry VTT mo
 | Setting | Default | Description |
 |---------|---------|-------------|
 | Language | `en` | Interface language (`pl` / `en`) |
-| Main deck table | `Pazzak - Main Deck` | RollTable with cards 1–10 |
-| Default hand deck | `Pazzak - Standard` | Fallback special card deck |
-| Hand deck prefix | `Pazzak - ` | Module looks for `Pazzak - ActorName` first |
+| Main deck table | `Pazaak - Main Deck` | RollTable with cards 1–10 |
+| Default hand deck | `Pazaak - Standard` | Fallback special card deck |
+| Hand deck prefix | `Pazaak - ` | Module looks for `Pazaak - ActorName` first |
 | Hand size | `4` | Number of special cards dealt to each player |
 | Max hand plays | `3` | How many special cards can be played |
 | Hand limit scope | `match` | Whether the limit resets each round or applies to the whole match |

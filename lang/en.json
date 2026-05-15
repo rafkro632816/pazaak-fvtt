@@ -11,7 +11,7 @@
   "PAZAAK.settingFallbackHandHint":  "RollTable for special hand cards (fallback when no actor-specific deck exists).",
 
   "PAZAAK.settingHandPrefix":        "Hand deck prefix",
-  "PAZAAK.settingHandPrefixHint":    "Module looks for a table named 'PREFIX + ActorName'. E.g. 'Pazzak - ' → 'Pazzak - Revan'.",
+  "PAZAAK.settingHandPrefixHint":    "Module looks for a table named 'PREFIX + ActorName'. E.g. 'Pazaak - ' → 'Pazaak - Revan'.",
 
   "PAZAAK.settingHandSize":          "Hand size",
   "PAZAAK.settingHandSizeHint":      "Number of special cards dealt to each player's hand before the match.",

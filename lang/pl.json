@@ -11,7 +11,7 @@
   "PAZAAK.settingFallbackHandHint":  "RollTable dla kart specjalnych (fallback gdy brak talii specyficznej aktora).",
 
   "PAZAAK.settingHandPrefix":        "Prefiks talii ręki",
-  "PAZAAK.settingHandPrefixHint":    "Moduł szuka tabeli 'PREFIKS + NazwaAktora'. Np. 'Pazzak - ' → 'Pazzak - Revan'.",
+  "PAZAAK.settingHandPrefixHint":    "Moduł szuka tabeli 'PREFIKS + NazwaAktora'. Np. 'Pazaak - ' → 'Pazaak - Revan'.",
 
   "PAZAAK.settingHandSize":          "Rozmiar ręki",
   "PAZAAK.settingHandSizeHint":      "Liczba kart specjalnych losowanych do ręki gracza przed meczem.",

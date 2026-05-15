@@ -49,7 +49,7 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
   _cards = new Map();
 
   /** Name of the new deck */
-  _deckName = "Pazzak - ";
+  _deckName = "Pazaak - ";
 
   /** Whether the deck should be visible to players (LIMITED); false = NONE */
   _playerVisible = true;
@@ -57,8 +57,8 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Reference to the RollTable being edited; null indicates create mode for a new deck. */
   _editingTable = null;
 
-  /** Extracts the user-entered suffix from _deckName, excluding the "Pazzak - " prefix. */
-  get _deckSuffix() { return this._deckName.startsWith("Pazzak - ") ? this._deckName.slice(9) : this._deckName; }
+  /** Extracts the user-entered suffix from _deckName, excluding the "Pazaak - " prefix. */
+  get _deckSuffix() { return this._deckName.startsWith("Pazaak - ") ? this._deckName.slice(9) : this._deckName; }
 
   /**
    * Initializes the deck builder, loading cards from the standard deck table.
@@ -126,14 +126,14 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Returns a list of editable RollTables (Pazzak-prefixed, excluding core tables).
+   * Returns a list of editable RollTables (Pazaak-prefixed, excluding core tables).
    * Filters out 'All Cards' and the active game table to prevent conflicts.
    */
   _getEditableTables() {
     const cfg = getCfg();
     const excluded = new Set([ALL_CARDS_TABLE_NAME, cfg.tableName]);
     return game.tables.contents
-      .filter(t => t.name.startsWith("Pazzak") && !excluded.has(t.name))
+      .filter(t => t.name.startsWith("Pazaak") && !excluded.has(t.name))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -196,7 +196,7 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
     // Read suffix from input and combine with prefix
     const suffixInput = this.element?.querySelector("[name='deck-name-suffix']");
     const suffix = suffixInput?.value.trim() ?? "";
-    this._deckName = "Pazzak - " + suffix;
+    this._deckName = "Pazaak - " + suffix;
 
     // Read whether the deck should be visible to players
     const visibleCb = this.element?.querySelector("[name='deck-player-visible']");
@@ -292,7 +292,7 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Save suffix when user types
     suffixInput?.addEventListener("input", e => {
-      this._deckName = "Pazzak - " + e.target.value;
+      this._deckName = "Pazaak - " + e.target.value;
     });
 
     // Sync _playerVisible with checkbox
@@ -309,7 +309,7 @@ export class DeckBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (val === "__new__") {
         // Reset to create new mode
         for (const entry of this._cards.values()) entry.count = 0;
-        this._deckName = "Pazzak - ";
+        this._deckName = "Pazaak - ";
         this._playerVisible = true;
         this._editingTable = null;
       } else {
