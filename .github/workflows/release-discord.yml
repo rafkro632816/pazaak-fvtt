@@ -11,7 +11,7 @@ jobs:
       - name: GitHub Releases to Discord
         uses: SethCohen/github-releases-to-discord@v1.20.0
         with:
-          webhook_url: ${{ secrets.WEBHOOK_URL }}
+          webhook_url: ${{ secrets.WEBHOOK_URL_RELEASE }}
           color: "1441536"
           username: "Pazaak — Release"
           content: "<@&1504461952339148890>"
