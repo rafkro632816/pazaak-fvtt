@@ -14,14 +14,9 @@ A Pazaak card game from Star Wars for 2 players, implemented as a Foundry VTT mo
 
 ## 🎲 How to Play
 
-Each player draws a card from the main deck (values 1–10) and adds it to their score. The goal is to reach exactly **20** (configurable). Going over is a **bust** — you lose the round. Players can also play a special card from their hand to adjust their score, then choose to **end their turn** or **stand** (lock their score for the round).
-
-The round is won by whoever has the highest score at or below the target. First to win **3 rounds** wins the match.
-
-**Special rules:**
-- Drawing 9 cards without busting → automatic stand and round win
-- Exact match of the target → automatic stand
-
+|  |  |
+|---|---|
+| Each player draws a card from the main deck (values 1–10) and adds it to their score. The goal is to reach exactly **20** (configurable). Going over is a **bust** — you lose the round. Players can also play a special card from their hand to adjust their score, then choose to **end their turn** or **stand** (lock their score for the round).<br><br>The round is won by whoever has the highest score at or below the target. First to win **3 rounds** wins the match.<br><br>**Special rules:**<br>- Drawing 9 cards without busting → automatic stand and round win<br>- Exact match of the target → automatic stand | <img src="assets/Preview/Pazaak_Icon.png" width="220"> |
 ---
 
 ## 🃏 Special Cards
@@ -50,8 +45,8 @@ The round is won by whoever has the highest score at or below the target. First 
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| Language | `pl` | Interface language (`pl` / `en`) |
-| Main deck table | `Pazaak - mazzo base` | RollTable with cards 1–10 |
+| Language | `en` | Interface language (`pl` / `en`) |
+| Main deck table | `Pazaak - Cukier` | RollTable with cards 1–10 |
 | Default hand deck | `Pazzak - Standard` | Fallback special card deck |
 | Hand deck prefix | `Pazzak - ` | Module looks for `Pazzak - ActorName` first |
 | Hand size | `4` | Number of special cards dealt to each player |
