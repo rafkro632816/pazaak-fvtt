@@ -196,6 +196,38 @@ export function registerSettings() {
       },
     });
 
+  // Replace the language <select> in Foundry's settings panel with flag emoji buttons
+  Hooks.on("renderSettingsConfig", (_app, html) => {
+    const select = html.querySelector?.(`select[name="${MODULE_ID}.language"]`);
+    if (!select) return;
+
+    const flags = [
+      { code: "en", emoji: "EN", label: "English" },
+      { code: "pl", emoji: "PL", label: "Polski"  },
+    ];
+
+    const container = document.createElement("div");
+    container.className = "pazaak-lang-flags";
+
+    for (const { code, emoji, label } of flags) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pazaak-lang-flag-btn" + (select.value === code ? " active" : "");
+      btn.dataset.lang = code;
+      btn.title = label;
+      btn.textContent = emoji;
+      btn.addEventListener("click", () => {
+        select.value = code;
+        container.querySelectorAll(".pazaak-lang-flag-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+      container.appendChild(btn);
+    }
+
+    select.style.display = "none";
+    select.insertAdjacentElement("afterend", container);
+  });
+
   r("tableName",             String,  DEFAULTS.tableName,
     "PAZAAK.settingTableName",        "PAZAAK.settingTableNameHint");
 
