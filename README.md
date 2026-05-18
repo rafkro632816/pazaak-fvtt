@@ -88,3 +88,26 @@ This module is system-agnostic and works with any Foundry VTT system. The follow
 | Module | Key | Link | Notes |
 |--------|-----|------|-------|
 | SW5E | `sw5e` | [https://github.com/sw5e-foundry/sw5e-module](https://github.com/sw5e-foundry/sw5e-module) | When detected, wager currency defaults to SW5E currencies automatically |
+
+## 🛠️ Installation
+
+To install the module, go to the **Add-on Modules** tab in the Foundry VTT Setup menu, click **Install Module**, and paste the following manifest URL:
+
+```text
+https://github.com/rafkro632816/pazaak-fvtt/releases/latest/download/module.json
+```
+
+## 🃏 Credits & Attribution
+
+Card graphics used in this module are based on the Pazaak card set created by [harrybillybobgeorge](https://www.deviantart.com/harrybillybobgeorge).
+
+Original card artwork/source:  
+[Pazaak Cards by harrybillybobgeorge](https://www.deviantart.com/harrybillybobgeorge/art/Pazaak-Cards-304128726)
+
+## ⚠️Disclaimer
+
+This is an unofficial fan-made module for Foundry Virtual Tabletop.
+
+Pazaak, Star Wars, Star Wars: Knights of the Old Republic, and related names, characters, and concepts are trademarks and/or copyrights of Lucasfilm Ltd., Disney, BioWare, Electronic Arts, and/or their respective owners.
+
+This project is not affiliated with, endorsed by, sponsored by, or approved by Lucasfilm Ltd., Disney, BioWare, Electronic Arts, or Foundry Gaming LLC.
